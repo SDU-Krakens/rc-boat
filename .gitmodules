@@ -1,0 +1,6 @@
+[submodule "imu-lib"]
+	path = imu-lib
+	url = https://github.com/SDU-Krakens/imu-lib
+[submodule "imu"]
+	path = imu
+	url = https://github.com/SDU-Krakens/imu-lib
