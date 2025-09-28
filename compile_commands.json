@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/gps  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/gps.dir/gps/gps.c.o -c /home/vizn3r/dev/kraken/rc-boat/gps/gps.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/gps/gps.c",
+  "output": "CMakeFiles/gps.dir/gps/gps.c.o"
+},
+{
+  "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/imu  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/imu.dir/imu/imu.c.o -c /home/vizn3r/dev/kraken/rc-boat/imu/imu.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/imu/imu.c",
+  "output": "CMakeFiles/imu.dir/imu/imu.c.o"
+},
+{
+  "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/gps -I/home/vizn3r/dev/kraken/rc-boat/imu  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/rc-boat.dir/main.c.o -c /home/vizn3r/dev/kraken/rc-boat/main.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/main.c",
+  "output": "CMakeFiles/rc-boat.dir/main.c.o"
+}
+]
