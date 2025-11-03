@@ -16,7 +16,6 @@ typedef struct {
 
 // Setup & initialization
 lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz);
-void lora_begin(lora_t *lora);
 void lora_end(lora_t *lora);
 
 // Configuration (call before begin)

@@ -32,7 +32,7 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz) {
 }
 
 uint8_t spi_read(spi_t *spi, uint8_t reg) {
-  uint8_t tx[2] = {(uint8_t)(reg & 0x7F), 0x00};
+  uint8_t tx[2] = {(uint8_t)(reg | 0x7F), 0x00};
   uint8_t rx[2] = {0x00, 0x00};
   struct spi_ioc_transfer tr = {};
   tr.tx_buf = (unsigned long)tx;
