@@ -26,7 +26,13 @@ target_include_directories(gps PUBLIC gps)
 add_library(imu imu/imu.c)
 target_include_directories(imu PUBLIC imu)
 
-target_link_libraries(rc-boat gps imu)
+# LoRa + SPI
+add_library(lora lora/lora.c)
+target_include_directories(lora PUBLIC lora)
+add_library(spi spi/spi.c)
+target_include_directories(spi PUBLIC spi)
+
+target_link_libraries(rc-boat gps imu lora spi)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)

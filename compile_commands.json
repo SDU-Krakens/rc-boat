@@ -13,7 +13,19 @@
 },
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
-  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/gps -I/home/vizn3r/dev/kraken/rc-boat/imu  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/rc-boat.dir/main.c.o -c /home/vizn3r/dev/kraken/rc-boat/main.c",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lora  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/lora.dir/lora/lora.c.o -c /home/vizn3r/dev/kraken/rc-boat/lora/lora.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/lora/lora.c",
+  "output": "CMakeFiles/lora.dir/lora/lora.c.o"
+},
+{
+  "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/spi  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/spi.dir/spi/spi.c.o -c /home/vizn3r/dev/kraken/rc-boat/spi/spi.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/spi/spi.c",
+  "output": "CMakeFiles/spi.dir/spi/spi.c.o"
+},
+{
+  "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/gps -I/home/vizn3r/dev/kraken/rc-boat/imu -I/home/vizn3r/dev/kraken/rc-boat/lora -I/home/vizn3r/dev/kraken/rc-boat/spi  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/rc-boat.dir/main.c.o -c /home/vizn3r/dev/kraken/rc-boat/main.c",
   "file": "/home/vizn3r/dev/kraken/rc-boat/main.c",
   "output": "CMakeFiles/rc-boat.dir/main.c.o"
 }
