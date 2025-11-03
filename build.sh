@@ -9,6 +9,3 @@ cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
 make
 
 cp ./compile_commands.json ../
-
-echo "Running 'rc-boat'"
-./rc-boat
