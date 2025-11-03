@@ -18,26 +18,26 @@ add_executable(rc-boat main.c)
 
 # Libraries
 
-# GPS
-add_library(gps gps/gps.c)
-target_include_directories(gps PUBLIC gps)
+# GPS + UART
+add_library(gps lib/gps/gps.c)
+target_include_directories(gps PUBLIC lib/gps)
+add_library(uart lib/uart/uart.c)
+target_include_directories(uart PUBLIC lib/uart)
 
 # IMU
-add_library(imu imu/imu.c)
-target_include_directories(imu PUBLIC imu)
+add_library(imu lib/imu/imu.c)
+target_include_directories(imu PUBLIC lib/imu)
 
 # LoRa + SPI
-add_library(lora lora/lora.c)
-target_include_directories(lora PUBLIC lora)
-add_library(spi spi/spi.c)
-target_include_directories(spi PUBLIC spi)
+add_library(lora lib/lora/lora.c)
+target_include_directories(lora PUBLIC lib/lora)
+add_library(spi lib/spi/spi.c)
+target_include_directories(spi PUBLIC lib/spi)
 
-target_link_libraries(rc-boat gps imu lora spi)
+target_link_libraries(rc-boat gps uart imu lora spi)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)
-
-
 
 if(RT_LIBRARY)
   target_link_libraries(rc-boat ${RT_LIBRARY})
