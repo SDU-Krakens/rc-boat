@@ -19,8 +19,8 @@ git checkout -b feature/your-feature-name
 ```
 
 **Branch naming:**
-- Use `feature/` prefix for new features (e.g., `feature/login-page`)
-- Use `fix/` prefix for bug fixes (e.g., `fix/button-alignment`)
+- Use `feature/` prefix for new features (e.g., `feature/uart`)
+- Use `fix/` prefix for bug fixes (e.g., `fix/memory-leaks`)
 - Keep names short and descriptive
 - Use dashes, not spaces
 
@@ -36,8 +36,8 @@ git commit -m "Add login form with validation"
 ```
 
 **Good commit messages:**
-- ✅ "Add user authentication"
-- ✅ "Fix navbar alignment on mobile"
+- ✅ "Add logging for UART"
+- ✅ "Fix issue where SPI crashes"
 - ❌ "stuff"
 - ❌ "changes"
 
