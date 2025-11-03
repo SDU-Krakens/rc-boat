@@ -1,7 +1,6 @@
 #include "lora.h"
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <time.h>

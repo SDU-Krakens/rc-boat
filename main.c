@@ -1,4 +1,4 @@
-#include "lora/lora.h"
+#include "lora.h"
 #include <stdlib.h>
 
 int main(void) {
