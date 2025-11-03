@@ -30,8 +30,8 @@
 #define IRQ_TX_DONE_MASK 0x08
 
 typedef struct {
-  int fd;
   char *dev;
+  int fd;
   uint32_t speed_hz;
 } spi_t;
 
