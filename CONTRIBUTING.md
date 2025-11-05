@@ -19,8 +19,8 @@ git checkout -b feature/your-feature-name
 ```
 
 **Branch naming:**
-- Use `feature/` prefix for new features (e.g., `feature/uart`)
-- Use `fix/` prefix for bug fixes (e.g., `fix/memory-leaks`)
+- Use `feature/` or `feat/` prefix for new features (e.g., `feat/gps`)
+- Use `fix/` prefix for bug fixes (e.g., `fix/gps-parsing`)
 - Keep names short and descriptive
 - Use dashes, not spaces
 
@@ -44,7 +44,7 @@ git commit -m "Add login form with validation"
 ### 4. Push Your Branch
 Push your branch to GitHub:
 ```bash
-git push origin feature/your-feature-name
+git push origin feat/your-feature-name
 ```
 
 If it's your first push on this branch, Git will tell you to set upstream - just copy and run the command it suggests.
@@ -83,7 +83,7 @@ Update your feature branch with the latest changes:
 ```bash
 git checkout main
 git pull origin main
-git checkout feature/your-feature-name
+git checkout feat/your-feature-name
 git merge main
 ```
 
@@ -91,7 +91,7 @@ If there are conflicts, Git will tell you which files. Open them, fix the confli
 ```bash
 git add .
 git commit -m "Merge main into feature branch"
-git push origin feature/your-feature-name
+git push origin feat/your-feature-name
 ```
 
 ### I made a mistake in my commit
@@ -105,8 +105,8 @@ If you already pushed, just make a new commit with the fix.
 ### I accidentally worked on main instead of a feature branch
 Create the branch now and move your changes:
 ```bash
-git checkout -b feature/your-feature-name
-git push origin feature/your-feature-name
+git checkout -b feat/your-feature-name
+git push origin feat/your-feature-name
 ```
 
 Then reset main:
@@ -145,13 +145,13 @@ git checkout -b feature/your-feature
 
 # Save your work
 git add .
-git commit -m "Description of changes"
-git push origin feature/your-feature
+git commit -m "Feat: Your feature description"
+git push origin feat/your-feature
 
 # Update your branch with latest main
 git checkout main
 git pull origin main
-git checkout feature/your-feature
+git checkout feat/your-feature
 git merge main
 
 # Switch between branches
