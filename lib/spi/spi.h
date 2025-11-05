@@ -36,6 +36,7 @@ typedef struct {
 } spi_t;
 
 spi_t *spi_init(const char *dev, uint32_t speed_hz);
+void spi_close(spi_t *spi);
 uint8_t spi_read(spi_t *spi, uint8_t reg);
 void spi_write(spi_t *spi, uint8_t reg, uint8_t data);
 void spi_write_array(spi_t *spi, uint8_t reg, uint8_t *data, uint8_t len);
