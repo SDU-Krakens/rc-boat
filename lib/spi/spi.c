@@ -31,6 +31,11 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz) {
   return spi;
 }
 
+void spi_close(spi_t *spi) {
+  close(spi->fd);
+  free(spi);
+}
+
 uint8_t spi_read(spi_t *spi, uint8_t reg) {
   uint8_t tx[2] = {(uint8_t)(reg | 0x7F), 0x00};
   uint8_t rx[2] = {0x00, 0x00};
