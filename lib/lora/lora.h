@@ -41,6 +41,7 @@ typedef struct {
   bool crc_enabled;
   int tx_power;
   gpio_t *reset;
+  gpio_t *dio00;
 } lora_t;
 
 // Setup & initialization
