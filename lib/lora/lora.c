@@ -62,15 +62,17 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   lora->crc_enabled = true;
   lora->tx_power = 17;
 
-  lora_write_reg(lora, REG_PREAMBLE_MSB, 0x00);
-  lora_write_reg(lora, REG_PREAMBLE_LSB, 0x08);
-  lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0x80);
-  lora_write_reg(lora, REG_FIFO_RX_BASE_ADDR, 0x00);
-
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
   usleep(10000);
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
   usleep(10000);
+
+  lora_write_reg(lora, REG_PREAMBLE_MSB, 0x00);
+  lora_write_reg(lora, REG_PREAMBLE_LSB, 0x08);
+  lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0x80);
+  lora_write_reg(lora, REG_FIFO_RX_BASE_ADDR, 0x00);
+  lora_write_reg(lora, REG_LNA, 0x23);
+  lora_write_reg(lora, REG_MODEM_CONFIG3, 0x04);
   return lora;
 }
 
