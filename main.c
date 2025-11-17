@@ -57,6 +57,7 @@ int main(void) {
   // lora_set_coding_rate(lora, 8);
   // lora_enable_crc(lora, true);
   // lora_set_tx_power(lora, 17);
+  printf("hello\n");
 
   for (;;) {
     // gps_location(gps);
