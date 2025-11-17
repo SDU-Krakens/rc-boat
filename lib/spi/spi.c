@@ -7,15 +7,22 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-spi_t *spi_init(const char *dev, uint32_t speed_hz) {
+spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
   spi_t *spi = malloc(sizeof(spi_t));
   spi->fd = open(dev, O_RDWR);
   spi->speed_hz = speed_hz;
 
-  uint8_t mode = 0;
-  ioctl(spi->fd, SPI_IOC_WR_MODE, &mode);
-  ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, &mode);
-  ioctl(spi->fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed_hz);
+  if (ioctl(spi->fd, SPI_IOC_WR_MODE, &mode) < 0) {
+    printf("spi_init: can't set spi mode\n");
+  }
+
+  if (ioctl(spi->fd, SPI_IOC_RD_MODE, &mode) < 0) {
+    printf("spi_init: can't get spi mode\n");
+  }
+
+  if (ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, &mode) < 0) {
+    printf("spi_init: can't set bits per word\n");
+  }
 
   spi_write(spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
   usleep(1000);
