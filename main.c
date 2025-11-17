@@ -54,11 +54,7 @@ int main(void) {
   }
 
   // Initialize IMU
-  if (imuConfig() != 0) {
-    printf("Failed to init IMU\n");
-    lora_end(lora);
-    return 1;
-  }
+  imuConfig();
 
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
@@ -111,10 +107,10 @@ int main(void) {
 size_t format_packet(char **message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr) {
-  int result = asprintf(message,
-                       "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
-                       "%d,head %d,cur %d",
-                       temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head,
-                       curr);
+  int result = asprintf(
+      message,
+      "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
+      "%d,head %d,cur %d",
+      temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head, curr);
   return (result >= 0) ? (size_t)result : 0;
 }
