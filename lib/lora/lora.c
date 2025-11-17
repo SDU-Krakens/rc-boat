@@ -63,6 +63,8 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   lora->tx_power = 17;
 
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+  lora_write_reg(lora, REG_PREAMBLE_MSB, 0x00);
+  lora_write_reg(lora, REG_PREAMBLE_LSB, 0x00);
   return lora;
 }
 
