@@ -213,23 +213,22 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
   lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0);
   lora_write_reg(lora, REG_FIFO_ADDR_PTR, 0);
 
+  // Write all data bytes to FIFO
   for (uint8_t i = 0; i < len; i++) {
     lora_write_reg(lora, REG_FIFO, (uint8_t)data[i]);
   }
-
   lora_write_reg(lora, REG_PAYLOAD_LENGTH, len);
-  lora_write_reg(lora, REG_IRQ_FLAGS, 0xFF);
+  lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
-  usleep(2000); // 2 ms
+  usleep(2000);
 
   long long start = get_time_ms();
-
   while (true) {
     uint8_t irq = lora_read_reg(lora, REG_IRQ_FLAGS);
 
     if (irq & IRQ_TX_DONE_MASK) {
-      lora_write_reg(lora, REG_IRQ_FLAGS, 0xFF);
+      lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
       return true;
     }
 
@@ -237,6 +236,6 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
       return false;
     }
 
-    usleep(5000); // poll every 5 ms
+    usleep(5000);
   }
 }
