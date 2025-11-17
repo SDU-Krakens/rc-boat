@@ -76,8 +76,6 @@ int main(void) {
     // lora_send(lora, message, message_len, 1000);
 
     printf("%s", message);
-
-    sleep(1);
   }
 
   return 0;
