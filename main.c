@@ -39,10 +39,10 @@ int gyro_pitch = 0;
 int gyro_yaw = 0;
 
 int main(void) {
-  lora_t *lora = lora_init("/dev/spidev0.0", 1000000);
-  if (lora == NULL) {
-    return 1;
-  }
+  // lora_t *lora = lora_init("/dev/spidev0.0", 1000000);
+  // if (lora == NULL) {
+  //   return 1;
+  // }
 
   // gps_t *gps = gps_init();
   // if (gps == NULL) {
@@ -51,12 +51,12 @@ int main(void) {
 
   imuConfig();
 
-  lora_set_frequency(lora, 433E6);
-  lora_set_bandwith(lora, 125E3);
-  lora_set_spreading_factor(lora, 12);
-  lora_set_coding_rate(lora, 8);
-  lora_enable_crc(lora, true);
-  lora_set_tx_power(lora, 17);
+  // lora_set_frequency(lora, 433E6);
+  // lora_set_bandwith(lora, 125E3);
+  // lora_set_spreading_factor(lora, 12);
+  // lora_set_coding_rate(lora, 8);
+  // lora_enable_crc(lora, true);
+  // lora_set_tx_power(lora, 17);
 
   for (;;) {
     // gps_location(gps);
