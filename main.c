@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -77,7 +78,9 @@ int main(void) {
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
 
-    message = "hello";
+    message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
+    strcpy(message, "hello");
+    message_len = strlen(message);
 
     if (message) {
       free(message); // Free previous allocation
