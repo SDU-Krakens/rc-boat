@@ -1,21 +1,54 @@
 #include "lora.h"
+#include "../gpio/gpio.h"
+#include "../spi/spi.h"
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <time.h>
 #include <unistd.h>
 
+uint8_t lora_read_reg(lora_t *lora, uint8_t reg) {
+  uint8_t tx[2] = {reg & 0x7F, 0};
+  uint8_t rx[2] = {0};
+  spi_transfer(lora->spi, tx, rx, 2);
+  return rx[1];
+}
+
+void lora_write_reg(lora_t *lora, uint8_t reg, uint8_t val) {
+  uint8_t tx[2] = {reg | 0x80, val};
+  uint8_t rx[2] = {0};
+  spi_transfer(lora->spi, tx, rx, 2);
+}
+
 // Setup & initialization
-lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz) {
+lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
+                  uint8_t reset_pin) {
   lora_t *lora = malloc(sizeof(lora_t));
   if (!lora) {
     return NULL;
   }
 
-  spi_t *spi = spi_init(spi_dev, spi_speed_hz);
-  if (!spi) {
+  // Setup GPIO
+  lora->reset = gpio_open(reset_pin);
+  gpio_set_direction(lora->reset, GPIO_OUTPUT);
+
+  gpio_set_value(lora->reset, 0);
+  usleep(10000);
+  gpio_set_value(lora->reset, 1);
+  usleep(10000);
+
+  lora->spi = spi_init(spi_dev, spi_speed_hz, 0);
+  if (!lora->spi) {
     free(lora);
+    return NULL;
+  }
+
+  uint8_t ver = lora_read_reg(lora, REG_VERSION);
+  if (ver != 0x12) {
+    printf("spi_init: wrong version %x\n", ver);
+    exit(1);
     return NULL;
   }
 

@@ -13,7 +13,8 @@
 uart_t *uart_init(const char *dev, uint16_t baud) {
   uart_t *uart = malloc(sizeof(uart_t));
   uart->fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
-  if (uart->fd != -1) {
+  if (uart->fd == -1) { // Changed != to ==
+    free(uart);
     return NULL;
   }
   uart->baud = baud;
@@ -43,9 +44,6 @@ size_t uart_send(uart_t *uart, char *buf, uint16_t len) {
     cpstr[len] = '\n';
 
     size_t count = write(uart->fd, cpstr, len + 1);
-    if (count < 0) {
-      return -1;
-    }
 
     free(cpstr);
     return count;
@@ -56,20 +54,17 @@ size_t uart_send(uart_t *uart, char *buf, uint16_t len) {
 size_t uart_read(uart_t *uart, char *buf, uint16_t len) {
   char c;
   char *b = buf;
-  size_t rx_len = -1;
+  // size_t rx_len = -1;
   size_t total_len = -1;
   while (1) {
-    rx_len = read(uart->fd, (void *)(&c), 1);
+    // rx_len =
+    read(uart->fd, (void *)(&c), 1);
 
-    if (rx_len < 0) {
-      sleep(1);
-    } else {
-      if (c == '\n') {
-        *b++ = '\0';
-        break;
-      }
-      *b++ = c;
+    if (c == '\n') {
+      *b++ = '\0';
+      break;
     }
+    *b++ = c;
     total_len += len;
   }
   return total_len;
