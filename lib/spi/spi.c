@@ -21,12 +21,12 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz) {
   usleep(1000);
   spi_write(spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
 
-  // uint8_t ver = spi_read(spi, REG_VERSION);
-  //  if (ver != 0x12) {
-  //    printf("spi_init: wrong version %x\n", ver);
-  //    exit(1);
-  //    return NULL;
-  //  }
+  uint8_t ver = spi_read(spi, REG_VERSION);
+  if (ver != 0x12) {
+    printf("spi_init: wrong version %x\n", ver);
+    exit(1);
+    return NULL;
+  }
 
   return spi;
 }
