@@ -9,15 +9,16 @@
 #include <time.h>
 #include <unistd.h>
 
+// In lora.c - keep these functions but implement LoRa-specific addressing
 uint8_t lora_read_reg(lora_t *lora, uint8_t reg) {
-  uint8_t tx[2] = {reg & 0x7F, 0};
+  uint8_t tx[2] = {reg & 0x7F, 0}; // LoRa-specific: clear MSB for read
   uint8_t rx[2] = {0};
   spi_transfer(lora->spi, tx, rx, 2);
   return rx[1];
 }
 
 void lora_write_reg(lora_t *lora, uint8_t reg, uint8_t val) {
-  uint8_t tx[2] = {reg | 0x80, val};
+  uint8_t tx[2] = {reg | 0x80, val}; // LoRa-specific: set MSB for write
   uint8_t rx[2] = {0};
   spi_transfer(lora->spi, tx, rx, 2);
 }
