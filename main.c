@@ -72,7 +72,7 @@ int main(void) {
                                 bat, watt, tilt, head, curr);
 
     if (message_len > 0 && message) {
-      bool sent = lora_send(lora, message, message_len, 1000);
+      bool sent = lora_send(lora, message, message_len, 10000);
       printf("Sent %d bytes: %s\n", (int)message_len, sent ? "OK" : "FAIL");
       printf("Message: %s\n", message);
     }
