@@ -8,7 +8,7 @@
 
 void gpio_export(gpio_t *gpio) {
   char *path;
-  asprintf(&path, "%s/export", GPIO_PATH); // Remove gpiochip%d part
+  asprintf(&path, "%s/export", GPIO_PATH);
 
   gpio->fd = open(path, O_WRONLY);
   if (gpio->fd < 0) {
@@ -18,13 +18,34 @@ void gpio_export(gpio_t *gpio) {
   }
 
   char buf[8];
-  sprintf(buf, "%d", gpio->pin + GPIO_OFFSET); // Add offset here
+  sprintf(buf, "%d", gpio->pin + GPIO_OFFSET);
   write(gpio->fd, buf, strlen(buf));
   close(gpio->fd);
   free(path);
 
   gpio->exported = true;
 }
+
+void gpio_unexport(gpio_t *gpio) {
+  char *path;
+  asprintf(&path, "%s/unexport", GPIO_PATH);
+
+  gpio->fd = open(path, O_WRONLY);
+  if (gpio->fd < 0) {
+    free(path);
+    printf("Failed to open GPIO export file\n");
+    return;
+  }
+
+  char buf[8];
+  sprintf(buf, "%d", gpio->pin + GPIO_OFFSET);
+  write(gpio->fd, buf, strlen(buf));
+  close(gpio->fd);
+  free(path);
+
+  gpio->exported = true;
+}
+
 gpio_t *gpio_open(uint32_t pin) {
   gpio_t *gpio = malloc(sizeof(gpio_t));
   gpio->pin = pin;
@@ -38,6 +59,7 @@ gpio_t *gpio_open(uint32_t pin) {
 }
 
 void gpio_close(gpio_t *gpio) {
+  gpio_unexport(gpio);
   close(gpio->fd);
   free(gpio);
 }
