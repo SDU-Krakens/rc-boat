@@ -73,6 +73,7 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   lora_write_reg(lora, REG_FIFO_RX_BASE_ADDR, 0x00);
   lora_write_reg(lora, REG_LNA, 0x23);
   lora_write_reg(lora, REG_MODEM_CONFIG3, 0x04);
+
   return lora;
 }
 
@@ -250,4 +251,6 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
 
     usleep(5000);
   }
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+  usleep(2000);
 }
