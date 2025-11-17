@@ -83,13 +83,12 @@ int main(void) {
       message = NULL;
     }
 
-    message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
-    strcpy(message, "hello");
-    message_len = strlen(message);
+    // message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
+    // strcpy(message, "hello");
+    // message_len = strlen(message);
 
-    // message_len = format_packet(&message, temp1, temp2, temp3, accel, lat,
-    // lon,
-    //                             bat, watt, tilt, head, curr);
+    message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
+                                bat, watt, tilt, head, curr);
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, 15000);
