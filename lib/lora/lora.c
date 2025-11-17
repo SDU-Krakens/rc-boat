@@ -13,7 +13,7 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz) {
     return NULL;
   }
 
-  spi_t *spi = spi_init(spi_dev, spi_speed_hz);
+  spi_t *spi = spi_init(spi_dev, spi_speed_hz, 0);
   if (!spi) {
     free(lora);
     return NULL;
