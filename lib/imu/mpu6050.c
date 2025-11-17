@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 
 // int main() {
 //   int test = i2c_read(adr_mpu, 0x26);
@@ -61,7 +62,10 @@ int i2c_read(char adr_slave, char adr_register) {
   } else {
     sscanf(buffer, "%x", &result);
   }
-  pclose(pipe);
+  int status = pclose(pipe);
+  if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+    return -1;
+  }
   return result;
 }
 int i2c_write(char adr_slave, char adr_register, char data) {
@@ -76,8 +80,8 @@ int i2c_write(char adr_slave, char adr_register, char data) {
     puts("Unable to open process");
     return (-1);
   }
-  pclose(pipe);
-  return 0;
+  int status = pclose(pipe);
+  return (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? 0 : -1;
 }
 void getRawAcc(int *xx, int *yy, int *zz) {
   uint16_t x = (i2c_read(0x68, 0x3b) << 8); // read high byte
@@ -124,10 +128,9 @@ void get_unfil_gyro(
     float *roll, float *pitch,
     float *yaw) { // fills the provided float pointers with unfiltered
                   // angular speed in deg/s using the gyro_scale
-  (void)yaw;
   int x, y, z;
   getRawGyro(&x, &y, &z);
   *roll = (((float)x - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
   *pitch = (((float)y - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
-  *roll = (((float)z - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
+  *yaw = (((float)z - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
 }

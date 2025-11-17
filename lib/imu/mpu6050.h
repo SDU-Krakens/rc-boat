@@ -31,6 +31,6 @@
 int i2c_read(char adr_slave, char adr_register);
 void getRawAcc(int *xx, int *yy, int *zz);
 void getRawGyro(int *roll, int *pitch, int *yaw);
-void imuConfig();
+int imuConfig();
 int i2c_write(char adr_slave, char adr_register, char data);
 void get_unfil_gyro(float *roll, float *pitch, float *yaw);

@@ -1,5 +1,4 @@
-// #include "gps.h"
-// #include "lib/imu/mpu6050.h"
+#include "gps.h"
 #include "lora.h"
 #include "mpu6050.h"
 #include <math.h>
@@ -46,7 +45,20 @@ int main(void) {
 
   char *message = NULL; // Change to pointer
 
-  imuConfig();
+  // Initialize GPS
+  gps_t *gps = gps_init();
+  if (gps == NULL) {
+    printf("Failed to init GPS\n");
+    lora_end(lora);
+    return 1;
+  }
+
+  // Initialize IMU
+  if (imuConfig() != 0) {
+    printf("Failed to init IMU\n");
+    lora_end(lora);
+    return 1;
+  }
 
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
@@ -57,6 +69,12 @@ int main(void) {
   printf("LoRa initialized\n");
 
   while (1) {
+    // Read GPS data
+    gps_location(gps);
+    lat = gps->loc.lat;
+    lon = gps->loc.lon;
+
+    // Read IMU data
     getRawAcc(&accel_x, &accel_y, &accel_z);
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
@@ -72,16 +90,20 @@ int main(void) {
                                 bat, watt, tilt, head, curr);
 
     if (message_len > 0 && message) {
-      bool sent = lora_send(lora, message, message_len, 10000);
-      printf("Sent %d bytes: %s\n", (int)message_len, sent ? "OK" : "FAIL");
+      bool sent = lora_send(lora, message, message_len, 15000);
+      printf("Sent %db OK?: %s\n", (int)message_len, sent ? "OK" : "FAIL");
       printf("Message: %s\n", message);
+    } else {
+      printf("Failed to format packet\n");
     }
 
-    usleep(100000); // 100ms delay
+    // Add delay to avoid CPU overuse
+    usleep(1000000); // Sleep for 1 second
   }
 
   if (message)
     free(message);
+  // TODO: Add GPS cleanup function when implemented
   lora_end(lora);
   return 0;
 }
@@ -89,9 +111,10 @@ int main(void) {
 size_t format_packet(char **message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr) {
-  return asprintf(message,
-                  "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
-                  "%d,head %d,cur %d",
-                  temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head,
-                  curr);
+  int result = asprintf(message,
+                       "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
+                       "%d,head %d,cur %d",
+                       temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head,
+                       curr);
+  return (result >= 0) ? (size_t)result : 0;
 }

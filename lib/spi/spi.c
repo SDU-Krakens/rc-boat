@@ -7,7 +7,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
+spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode,
+                uint8_t cs_pin) {
   spi_t *spi = malloc(sizeof(spi_t));
   spi->fd = open(dev, O_RDWR);
   if (spi->fd < 0) {
@@ -16,6 +17,8 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
     return NULL;
   }
   spi->speed_hz = speed_hz;
+  spi->cs_pin = gpio_open(cs_pin);
+  gpio_set_direction(spi->cs_pin, GPIO_OUTPUT);
 
   if (ioctl(spi->fd, SPI_IOC_WR_MODE, &mode) < 0) {
     printf("spi_init: can't set spi mode\n");
@@ -38,6 +41,7 @@ void spi_close(spi_t *spi) {
 }
 
 uint8_t spi_read(spi_t *spi, uint8_t reg) {
+  gpio_set_value(spi->cs_pin, 0);
   uint8_t tx[2] = {(uint8_t)(reg & 0x7F), 0x00}; // Changed | to &
   uint8_t rx[2] = {0x00, 0x00};
   struct spi_ioc_transfer tr = {};
@@ -47,10 +51,12 @@ uint8_t spi_read(spi_t *spi, uint8_t reg) {
   tr.speed_hz = spi->speed_hz;
   tr.bits_per_word = 8;
   ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
+  gpio_set_value(spi->cs_pin, 1);
   return rx[1];
 }
 
 void spi_write(spi_t *spi, uint8_t reg, uint8_t val) {
+  gpio_set_value(spi->cs_pin, 0);
   uint8_t tx[2] = {(uint8_t)(reg | 0x80), val}; // Changed & to |
   struct spi_ioc_transfer tr = {};
   tr.tx_buf = (unsigned long)tx;
@@ -58,9 +64,11 @@ void spi_write(spi_t *spi, uint8_t reg, uint8_t val) {
   tr.speed_hz = spi->speed_hz;
   tr.bits_per_word = 8;
   ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
+  gpio_set_value(spi->cs_pin, 1);
 }
 
 void spi_transfer(spi_t *spi, uint8_t *tx_buf, uint8_t *rx_buf, uint8_t len) {
+  gpio_set_value(spi->cs_pin, 0);
   struct spi_ioc_transfer tr = {
       .tx_buf = (unsigned long)tx_buf,
       .rx_buf = (unsigned long)rx_buf,
@@ -71,9 +79,11 @@ void spi_transfer(spi_t *spi, uint8_t *tx_buf, uint8_t *rx_buf, uint8_t len) {
   };
 
   ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
+  gpio_set_value(spi->cs_pin, 1);
 }
 
 void spi_write_array(spi_t *spi, uint8_t reg, uint8_t *data, uint8_t len) {
+  gpio_set_value(spi->cs_pin, 0);
   uint8_t hdr = reg | 0x80;
   struct spi_ioc_transfer tr[2] = {};
   tr[0].tx_buf = (unsigned long)&hdr;
@@ -85,4 +95,5 @@ void spi_write_array(spi_t *spi, uint8_t reg, uint8_t *data, uint8_t len) {
   tr[1].speed_hz = spi->speed_hz;
   tr[1].bits_per_word = 8;
   ioctl(spi->fd, SPI_IOC_MESSAGE(2), &tr);
+  gpio_set_value(spi->cs_pin, 1);
 }

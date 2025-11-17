@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../gpio/gpio.h"
 #include <stdint.h>
 
 #define REG_FIFO 0x00
@@ -33,9 +34,11 @@ typedef struct {
   char *dev;
   int fd;
   uint32_t speed_hz;
+  gpio_t *cs_pin;
 } spi_t;
 
-spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode);
+spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode,
+                uint8_t cs_pin);
 void spi_close(spi_t *spi);
 uint8_t spi_read(spi_t *spi, uint8_t reg);
 void spi_transfer(spi_t *spi, uint8_t *tx_buf, uint8_t *rx_buf, uint8_t len);
