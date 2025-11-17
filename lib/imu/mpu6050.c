@@ -25,8 +25,8 @@
 //  * 1000
 //  * 2000
 //  */
-u_int8_t gyro_scale; // [+- deg/s]
-                     //
+uint8_t gyro_scale; // [+- deg/s]
+                    //
 // /* Defines the range of values the accelerometer will suply.
 //  * The allowed values are in +- g (multiplies of ~9.81m/s/s):
 //  * 2
@@ -34,12 +34,12 @@ u_int8_t gyro_scale; // [+- deg/s]
 //  * 8
 //  * 16
 //  */
-u_int8_t accelerometerScale; // [+- g]
+uint8_t accelerometerScale; // [+- g]
 
-u_int8_t dlpf;        // 3bit // changes depending on the bandwidth and delay of
-                      // gyro and accelerometer (see register map page 13)
-u_int8_t ext_synq;    // 3bit // no syncing
-u_int8_t sample_rate; // [kHz]
+uint8_t dlpf;        // 3bit // changes depending on the bandwidth and delay of
+                     // gyro and accelerometer (see register map page 13)
+uint8_t ext_synq;    // 3bit // no syncing
+uint8_t sample_rate; // [kHz]
 
 int i2c_read(char adr_slave, char adr_register) {
   int result = -1;
@@ -80,11 +80,11 @@ int i2c_write(char adr_slave, char adr_register, char data) {
   return 0;
 }
 void getRawAcc(int *xx, int *yy, int *zz) {
-  u_int16_t x = (i2c_read(0x68, 0x3b) << 8); // read high byte
-  x |= i2c_read(0x68, 0x3C); // read low byte and add to high one
-  u_int16_t y = (i2c_read(0x68, 0x3D) << 8);
+  uint16_t x = (i2c_read(0x68, 0x3b) << 8); // read high byte
+  x |= i2c_read(0x68, 0x3C);                // read low byte and add to high one
+  uint16_t y = (i2c_read(0x68, 0x3D) << 8);
   y |= i2c_read(0x68, 0x3E);
-  u_int16_t z = (i2c_read(0x68, 0x3F) << 8);
+  uint16_t z = (i2c_read(0x68, 0x3F) << 8);
   z |= i2c_read(0x68, 0x40);
   *xx = (int)x; // change into int and return
   *yy = (int)y;
@@ -95,26 +95,26 @@ void imuConfig() {
   //    management byte i2cwrite(adr_mpu, 0x6b, (pwr_mgmt_1&(~(1<<6))));
   //    // write back the byte with sleep disabled
   i2c_write(adr_mpu, 0x6b, 0x00); // turn off sleep mode
-  u_int8_t gyro_out_rate;
+  uint8_t gyro_out_rate;
   if (dlpf == 0 || dlpf == 7) { // decide what the GOR is
     gyro_out_rate = 8;
   } else {
     gyro_out_rate = 1;
   }
-  u_int8_t samplediv = gyro_out_rate / sample_rate - 1; // calculate SD
-  i2c_write(adr_mpu, 0x19, samplediv);                  // send SD to MPU
-  u_int8_t config_val = 0x00 | dlpf | (ext_synq << 3);
+  uint8_t samplediv = gyro_out_rate / sample_rate - 1; // calculate SD
+  i2c_write(adr_mpu, 0x19, samplediv);                 // send SD to MPU
+  uint8_t config_val = 0x00 | dlpf | (ext_synq << 3);
   i2c_write(adr_mpu, 0x1a, config_val); // external synq and dlpf
   i2c_write(adr_mpu, 0x1b,
             GYRO_RANGE << 3); // sets up the range of gyroscope
   i2c_write(adr_mpu, 0x1c, ACCEL_RANGE << 3);
 }
 void getRawGyro(int *roll, int *pitch, int *yaw) {
-  u_int16_t x = (i2c_read(adr_mpu, 0x43) << 8); // read high byte
+  uint16_t x = (i2c_read(adr_mpu, 0x43) << 8); // read high byte
   x |= i2c_read(adr_mpu, 0x44); // read low byte and add to high one
-  u_int16_t y = (i2c_read(adr_mpu, 0x45) << 8);
+  uint16_t y = (i2c_read(adr_mpu, 0x45) << 8);
   y |= i2c_read(adr_mpu, 0x46);
-  u_int16_t z = (i2c_read(adr_mpu, 0x47) << 8);
+  uint16_t z = (i2c_read(adr_mpu, 0x47) << 8);
   z |= i2c_read(adr_mpu, 0x48);
   *roll = (int)x; // change into int and return
   *pitch = (int)y;

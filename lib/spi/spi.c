@@ -10,13 +10,19 @@
 spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
   spi_t *spi = malloc(sizeof(spi_t));
   spi->fd = open(dev, O_RDWR);
+  if (spi->fd < 0) {
+    printf("spi_init: failed to open device\n");
+    free(spi);
+    return NULL;
+  }
   spi->speed_hz = speed_hz;
 
-  if (ioctl(spi->fd, SPI_IOC_RD_MODE, &mode) < 0) {
-    printf("spi_init: can't get spi mode\n");
+  if (ioctl(spi->fd, SPI_IOC_WR_MODE, &mode) < 0) {
+    printf("spi_init: can't set spi mode\n");
   }
 
-  if (ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, 8) < 0) {
+  uint8_t bits = 8;
+  if (ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0) { // Pass pointer!
     printf("spi_init: can't set bits per word\n");
   }
 
@@ -26,7 +32,6 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
 
   return spi;
 }
-
 void spi_close(spi_t *spi) {
   close(spi->fd);
   free(spi);

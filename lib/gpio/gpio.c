@@ -8,19 +8,40 @@
 
 void gpio_export(gpio_t *gpio) {
   char *path;
-  asprintf(&path, "%s/gpiochip%d/export", GPIO_PATH, GPIO_OFFSET);
+  asprintf(&path, "%s/export", GPIO_PATH);
 
   gpio->fd = open(path, O_WRONLY);
   if (gpio->fd < 0) {
+    free(path);
+    printf("Failed to open GPIO export file\n");
     return;
   }
 
   char buf[8];
-  sprintf(buf, "%d", gpio->pin);
+  sprintf(buf, "%d", gpio->pin + GPIO_OFFSET);
   write(gpio->fd, buf, strlen(buf));
   close(gpio->fd);
   free(path);
-  path = NULL;
+
+  gpio->exported = true;
+}
+
+void gpio_unexport(gpio_t *gpio) {
+  char *path;
+  asprintf(&path, "%s/unexport", GPIO_PATH);
+
+  gpio->fd = open(path, O_WRONLY);
+  if (gpio->fd < 0) {
+    free(path);
+    printf("Failed to open GPIO export file\n");
+    return;
+  }
+
+  char buf[8];
+  sprintf(buf, "%d", gpio->pin + GPIO_OFFSET);
+  write(gpio->fd, buf, strlen(buf));
+  close(gpio->fd);
+  free(path);
 
   gpio->exported = true;
 }
@@ -38,8 +59,9 @@ gpio_t *gpio_open(uint32_t pin) {
 }
 
 void gpio_close(gpio_t *gpio) {
-  free(gpio);
+  gpio_unexport(gpio);
   close(gpio->fd);
+  free(gpio);
 }
 
 void gpio_set_direction(gpio_t *gpio, bool direction) {
@@ -99,14 +121,19 @@ bool gpio_get_value(gpio_t *gpio) {
 
   int fd = open(path, O_RDONLY);
   if (fd < 0) {
+    free(path);
     return false;
   }
 
   char buf[64];
-  read(fd, buf, 2);
+  ssize_t bytes = read(fd, buf, 2);
   close(fd);
   free(path);
-  path = NULL;
 
-  return true;
+  if (bytes <= 0) {
+    return false;
+  }
+
+  // Actually parse the value!
+  return (buf[0] == '1');
 }
