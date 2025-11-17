@@ -73,12 +73,14 @@ int main(void) {
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
 
-    message_len = format_packet(message, temp1, temp2, temp3, accel, lat, lon,
-                                bat, watt, tilt, head, curr);
-    // lora_send(lora, message, message_len, 1000);
-    printf("sent\n");
+    // message_len = format_packet(message, temp1, temp2, temp3, accel, lat,
+    // lon,
+    //                             bat, watt, tilt, head, curr);
+    //  lora_send(lora, message, message_len, 1000);
 
-    printf("%s", message);
+    // pinnt accel variables
+    printf("accel: %f\n", accel);
+    printf("tilt: %d\n", tilt);
   }
 
   return 0;
