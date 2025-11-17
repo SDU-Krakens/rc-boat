@@ -257,6 +257,6 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
       return false;
     }
 
-    usleep(5000);
+    usleep(1000);
   }
 }
