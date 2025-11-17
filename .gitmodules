@@ -1,9 +1,0 @@
-[submodule "imu-lib"]
-	path = imu-lib
-	url = https://github.com/SDU-Krakens/imu-lib
-[submodule "imu"]
-	path = imu
-	url = https://github.com/SDU-Krakens/imu-lib
-[submodule "gps"]
-	path = gps
-	url = https://github.com/SDU-Krakens/gps-lib
