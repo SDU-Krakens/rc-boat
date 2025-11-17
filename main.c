@@ -73,8 +73,9 @@ int main(void) {
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, 1000);
-      printf("Sent %d bytes: %s\n", (int)message_len, sent ? "OK" : "FAIL");
-      printf("Message: %s\n", message);
+      printf("accel: %f tilt: %d raw: %d %d %d gyro: %d %d %d sent: %d\n",
+             accel, tilt, accel_x, accel_y, accel_z, gyro_roll, gyro_pitch,
+             gyro_yaw, sent);
     }
 
     usleep(100000); // 100ms delay
@@ -85,6 +86,7 @@ int main(void) {
   lora_end(lora);
   return 0;
 }
+
 size_t format_packet(char **message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr) {
