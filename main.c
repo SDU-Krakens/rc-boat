@@ -1,4 +1,4 @@
-#include "gps.h"
+// #include "gps.h"
 #include "lora.h"
 #include "mpu6050.h"
 #include <math.h>
@@ -46,12 +46,12 @@ int main(void) {
   char *message = NULL; // Change to pointer
 
   // Initialize GPS
-  gps_t *gps = gps_init();
-  if (gps == NULL) {
-    printf("Failed to init GPS\n");
-    lora_end(lora);
-    return 1;
-  }
+  // gps_t *gps = gps_init();
+  // if (gps == NULL) {
+  //  printf("Failed to init GPS\n");
+  //  lora_end(lora);
+  //  return 1;
+  //}
 
   // Initialize IMU
   imuConfig();
@@ -66,9 +66,9 @@ int main(void) {
 
   while (1) {
     // Read GPS data
-    gps_location(gps);
-    lat = gps->loc.lat;
-    lon = gps->loc.lon;
+    // gps_location(gps);
+    // lat = gps->loc.lat;
+    // lon = gps->loc.lon;
 
     // Read IMU data
     getRawAcc(&accel_x, &accel_y, &accel_z);

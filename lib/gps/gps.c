@@ -29,8 +29,8 @@ void gps_location(gps_t *gps) {
     case NMEA_GPGGA:
       // nmea_parse_gpgga(buf, &gpgga);
 
-      gps_coonvert_deg_to_dec(&gpgga.latitude, gpgga.lat, &gpgga.longitude,
-                              gpgga.lon);
+      gps_convert_deg_to_dec(&gpgga.latitude, gpgga.lat, &gpgga.longitude,
+                             gpgga.lon);
 
       gps->loc.lat = gpgga.latitude;
       gps->loc.lon = gpgga.longitude;
@@ -62,7 +62,7 @@ double gps_deg_to_dec(double deg) {
   return round(absdlat + (absmlat / 60) + (absslat / 3600)) / 1000000;
 }
 
-void gps_coonvert_deg_to_dec(double *lat, char ns, double *lon, char we) {
+void gps_convert_deg_to_dec(double *lat, char ns, double *lon, char we) {
   double _lat = (ns == 'N') ? *lat : -1 * (*lat);
   double _lon = (we == 'E') ? *lon : -1 * (*lon);
 

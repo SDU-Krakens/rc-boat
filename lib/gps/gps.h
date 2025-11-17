@@ -19,4 +19,4 @@ gps_t *gps_init(void);
 void gps_location(gps_t *gps);
 
 double gps_deg_to_dec(double deg);
-void gps_coonvert_deg_to_dec(double *lat, char ns, double *lon, char we);
+void gps_convert_deg_to_dec(double *lat, char ns, double *lon, char we);
