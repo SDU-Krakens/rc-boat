@@ -9,17 +9,20 @@
 #include <time.h>
 #include <unistd.h>
 
+// In lora.c - keep these functions but implement LoRa-specific addressing
 uint8_t lora_read_reg(lora_t *lora, uint8_t reg) {
-  uint8_t tx[2] = {reg & 0x7F, 0};
+  uint8_t tx[2] = {reg & 0x7F, 0}; // LoRa-specific: clear MSB for read
   uint8_t rx[2] = {0};
   spi_transfer(lora->spi, tx, rx, 2);
+  printf("lora read: %x %x\n", reg, rx[1]);
   return rx[1];
 }
 
 void lora_write_reg(lora_t *lora, uint8_t reg, uint8_t val) {
-  uint8_t tx[2] = {reg | 0x80, val};
+  uint8_t tx[2] = {reg | 0x80, val}; // LoRa-specific: set MSB for write
   uint8_t rx[2] = {0};
   spi_transfer(lora->spi, tx, rx, 2);
+  printf("lora write: %x %x\n", reg, val);
 }
 
 // Setup & initialization
@@ -39,7 +42,7 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   gpio_set_value(lora->reset, 1);
   usleep(10000);
 
-  lora->spi = spi_init(spi_dev, spi_speed_hz, 0);
+  lora->spi = spi_init(spi_dev, spi_speed_hz, 0, 27);
   if (!lora->spi) {
     free(lora);
     return NULL;
@@ -58,6 +61,19 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   lora->coding_rate = 5;
   lora->crc_enabled = true;
   lora->tx_power = 17;
+
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+  usleep(10000);
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+  usleep(10000);
+
+  lora_write_reg(lora, REG_PREAMBLE_MSB, 0x00);
+  lora_write_reg(lora, REG_PREAMBLE_LSB, 0x08);
+  lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0x80);
+  lora_write_reg(lora, REG_FIFO_RX_BASE_ADDR, 0x00);
+  lora_write_reg(lora, REG_LNA, 0x23);
+  lora_write_reg(lora, REG_MODEM_CONFIG3, 0x04);
+
   return lora;
 }
 
@@ -82,10 +98,10 @@ void lora_set_spreading_factor(lora_t *lora, uint16_t sf) {
     sf = 12;
   lora->spreading_factor = sf;
 
-  uint8_t config = spi_read(lora->spi, REG_MODEM_CONFIG2);
+  uint8_t config = lora_read_reg(lora, REG_MODEM_CONFIG2);
   config = (config & 0x0F) | ((sf << 4) & 0xF0);
 
-  spi_write(lora->spi, REG_MODEM_CONFIG2, config);
+  lora_write_reg(lora, REG_MODEM_CONFIG2, config);
 }
 
 void lora_set_coding_rate(lora_t *lora, uint16_t cr) {
@@ -95,10 +111,10 @@ void lora_set_coding_rate(lora_t *lora, uint16_t cr) {
     cr = 8;
   lora->coding_rate = cr;
   cr -= 4;
-  uint8_t config = spi_read(lora->spi, REG_MODEM_CONFIG1);
+  uint8_t config = lora_read_reg(lora, REG_MODEM_CONFIG1);
   config = (config & 0xF1) | (cr << 1);
 
-  spi_write(lora->spi, REG_MODEM_CONFIG1, config);
+  lora_write_reg(lora, REG_MODEM_CONFIG1, config);
 }
 
 void lora_set_bandwith(lora_t *lora, uint32_t bw) {
@@ -123,20 +139,20 @@ void lora_set_bandwith(lora_t *lora, uint32_t bw) {
   else if (bw <= 250E3)
     bw_index = 8;
 
-  uint8_t config = spi_read(lora->spi, REG_MODEM_CONFIG1);
-  config = (config & 0xFC) | (bw_index << 4);
+  uint8_t config = lora_read_reg(lora, REG_MODEM_CONFIG1);
+  config = (config & 0x0F) | (bw_index << 4);
 
-  spi_write(lora->spi, REG_MODEM_CONFIG1, config);
+  lora_write_reg(lora, REG_MODEM_CONFIG1, config);
 }
 
 void lora_enable_crc(lora_t *lora, bool enable) {
   lora->crc_enabled = enable;
-  uint8_t config = spi_read(lora->spi, REG_MODEM_CONFIG2);
+  uint8_t config = lora_read_reg(lora, REG_MODEM_CONFIG2);
   if (enable)
     config |= 0x04;
   else
     config &= ~0x04;
-  spi_write(lora->spi, REG_MODEM_CONFIG2, config);
+  lora_write_reg(lora, REG_MODEM_CONFIG2, config);
 }
 
 void lora_set_tx_power(lora_t *lora, int power) {
@@ -179,8 +195,8 @@ void lora_set_tx_power(lora_t *lora, int power) {
   }
 
   uint8_t reg_val = (pa_select << 7) | (max_power << 4) | output_power;
-  spi_write(lora->spi, REG_PA_CONFIG, reg_val);
-  spi_write(lora->spi, REG_PA_DAC, pa_dac);
+  lora_write_reg(lora, REG_PA_CONFIG, reg_val);
+  lora_write_reg(lora, REG_PA_DAC, pa_dac);
 
   // Not used for now, useful for logging
   /*
@@ -207,26 +223,40 @@ long long get_time_ms() {
 
 bool lora_send(lora_t *lora, const char *data, uint8_t len,
                uint16_t timeout_ms) {
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+  usleep(5000);
+
   lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0);
   lora_write_reg(lora, REG_FIFO_ADDR_PTR, 0);
-  spi_write_array(lora->spi, REG_FIFO, (uint8_t *)data, len);
+
+  // Write all data bytes to FIFO
+  for (uint8_t i = 0; i < len; i++) {
+    lora_write_reg(lora, REG_FIFO, (uint8_t)data[i]);
+  }
   lora_write_reg(lora, REG_PAYLOAD_LENGTH, len);
-  lora_write_reg(lora, REG_IRQ_FLAGS, 0xFF);
+  lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+  usleep(5000);
 
   long long start = get_time_ms();
   while (true) {
-    uint8_t irq = spi_read(lora->spi, REG_IRQ_FLAGS);
+    uint8_t irq = lora_read_reg(lora, REG_IRQ_FLAGS);
 
     if (irq & IRQ_TX_DONE_MASK) {
-      spi_write(lora->spi, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+      lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+      usleep(5000);
+
+      lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
       return true;
     }
 
     if (get_time_ms() - start > timeout_ms) {
+      lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+      usleep(5000);
       return false;
     }
 
-    usleep(5000);
+    usleep(1000);
   }
 }
