@@ -33,7 +33,7 @@ void spi_close(spi_t *spi) {
 }
 
 uint8_t spi_read(spi_t *spi, uint8_t reg) {
-  uint8_t tx[2] = {(uint8_t)(reg | 0x7F), 0x00};
+  uint8_t tx[2] = {(uint8_t)(reg & 0x7F), 0x00}; // Changed | to &
   uint8_t rx[2] = {0x00, 0x00};
   struct spi_ioc_transfer tr = {};
   tr.tx_buf = (unsigned long)tx;
@@ -43,6 +43,16 @@ uint8_t spi_read(spi_t *spi, uint8_t reg) {
   tr.bits_per_word = 8;
   ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
   return rx[1];
+}
+
+void spi_write(spi_t *spi, uint8_t reg, uint8_t val) {
+  uint8_t tx[2] = {(uint8_t)(reg | 0x80), val}; // Changed & to |
+  struct spi_ioc_transfer tr = {};
+  tr.tx_buf = (unsigned long)tx;
+  tr.len = 2;
+  tr.speed_hz = spi->speed_hz;
+  tr.bits_per_word = 8;
+  ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
 }
 
 void spi_transfer(spi_t *spi, uint8_t *tx_buf, uint8_t *rx_buf, uint8_t len) {
@@ -55,16 +65,6 @@ void spi_transfer(spi_t *spi, uint8_t *tx_buf, uint8_t *rx_buf, uint8_t len) {
       .delay_usecs = 0,
   };
 
-  ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
-}
-
-void spi_write(spi_t *spi, uint8_t reg, uint8_t val) {
-  uint8_t tx[2] = {(uint8_t)(reg & 0x7F), val};
-  struct spi_ioc_transfer tr = {};
-  tr.tx_buf = (unsigned long)tx;
-  tr.len = 2;
-  tr.speed_hz = spi->speed_hz;
-  tr.bits_per_word = 8;
   ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
 }
 

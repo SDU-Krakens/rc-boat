@@ -13,7 +13,8 @@
 uart_t *uart_init(const char *dev, uint16_t baud) {
   uart_t *uart = malloc(sizeof(uart_t));
   uart->fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
-  if (uart->fd != -1) {
+  if (uart->fd == -1) { // Changed != to ==
+    free(uart);
     return NULL;
   }
   uart->baud = baud;

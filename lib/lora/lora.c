@@ -1,5 +1,6 @@
 #include "lora.h"
 #include "../gpio/gpio.h"
+#include "../spi/spi.h"
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <stdio.h>
