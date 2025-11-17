@@ -12,10 +12,12 @@ typedef struct {
   uint16_t coding_rate;
   bool crc_enabled;
   int tx_power;
+  uint8_t reset_pin;
 } lora_t;
 
 // Setup & initialization
-lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz);
+lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
+                  uint8_t reset_pin);
 void lora_end(lora_t *lora);
 
 // Configuration (call before begin)

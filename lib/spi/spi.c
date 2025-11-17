@@ -12,27 +12,16 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
   spi->fd = open(dev, O_RDWR);
   spi->speed_hz = speed_hz;
 
-  if (ioctl(spi->fd, SPI_IOC_WR_MODE, &mode) < 0) {
-    printf("spi_init: can't set spi mode\n");
-  }
-
   if (ioctl(spi->fd, SPI_IOC_RD_MODE, &mode) < 0) {
     printf("spi_init: can't get spi mode\n");
   }
 
-  if (ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, &mode) < 0) {
+  if (ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, 8) < 0) {
     printf("spi_init: can't set bits per word\n");
   }
 
-  spi_write(spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
-  usleep(1000);
-  spi_write(spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
-
-  uint8_t ver = spi_read(spi, REG_VERSION);
-  if (ver != 0x12) {
-    printf("spi_init: wrong version %x\n", ver);
-    exit(1);
-    return NULL;
+  if (ioctl(spi->fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed_hz) < 0) {
+    printf("spi_init: can't get bits per word\n");
   }
 
   return spi;
@@ -54,6 +43,19 @@ uint8_t spi_read(spi_t *spi, uint8_t reg) {
   tr.bits_per_word = 8;
   ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
   return rx[1];
+}
+
+void spi_transfer(spi_t *spi, uint8_t *tx_buf, uint8_t *rx_buf, uint8_t len) {
+  struct spi_ioc_transfer tr = {
+      .tx_buf = (unsigned long)tx_buf,
+      .rx_buf = (unsigned long)rx_buf,
+      .len = len,
+      .speed_hz = spi->speed_hz,
+      .bits_per_word = 8,
+      .delay_usecs = 0,
+  };
+
+  ioctl(spi->fd, SPI_IOC_MESSAGE(1), &tr);
 }
 
 void spi_write(spi_t *spi, uint8_t reg, uint8_t val) {

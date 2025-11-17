@@ -1,21 +1,51 @@
 #include "lora.h"
+#include "../gpio/gpio.h"
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <time.h>
 #include <unistd.h>
 
+uint8_t lora_read_reg(lora_t *lora, uint8_t reg) {
+  uint8_t tx[2] = {reg & 0x7F, 0};
+  uint8_t rx[2] = {0};
+  spi_transfer(lora->spi, tx, rx, 2);
+  return rx[1];
+}
+
+void lora_write_reg(lora_t *lora, uint8_t reg, uint8_t val) {
+  uint8_t tx[2] = {reg | 0x80, val};
+  uint8_t rx[2] = {0};
+  spi_transfer(lora->spi, tx, rx, 2);
+}
+
 // Setup & initialization
-lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz) {
+lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
+                  uint8_t reset_pin) {
   lora_t *lora = malloc(sizeof(lora_t));
   if (!lora) {
     return NULL;
   }
 
-  spi_t *spi = spi_init(spi_dev, spi_speed_hz, 0);
-  if (!spi) {
+  // Setup GPIO
+  lora->reset_pin = reset_pin;
+
+  lora->spi = spi_init(spi_dev, spi_speed_hz, 0);
+  if (!lora->spi) {
     free(lora);
+    return NULL;
+  }
+
+  spi_write(lora->spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+  usleep(1000);
+  spi_write(lora->spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+
+  uint8_t ver = spi_read(lora->spi, REG_VERSION);
+  if (ver != 0x12) {
+    printf("spi_init: wrong version %x\n", ver);
+    exit(1);
     return NULL;
   }
 
