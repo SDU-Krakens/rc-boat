@@ -21,7 +21,7 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode) {
   }
 
   if (ioctl(spi->fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed_hz) < 0) {
-    printf("spi_init: can't get bits per word\n");
+    printf("spi_init: can't set max speed hz\n");
   }
 
   return spi;
