@@ -38,7 +38,7 @@ int gyro_pitch = 0;
 int gyro_yaw = 0;
 
 int main(void) {
-  lora_t *lora = lora_init("/dev/spidev0.0", 1000000, 22);
+  lora_t *lora = lora_init("/dev/spidev0.0", 8000000, 22);
   if (lora == NULL) {
     printf("Failed to init LoRa\n");
     return 1;
@@ -73,9 +73,8 @@ int main(void) {
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, 1000);
-      printf("accel: %f tilt: %d raw: %d %d %d gyro: %d %d %d sent: %d\n",
-             accel, tilt, accel_x, accel_y, accel_z, gyro_roll, gyro_pitch,
-             gyro_yaw, sent);
+      printf("Sent %d bytes: %s\n", (int)message_len, sent ? "OK" : "FAIL");
+      printf("Message: %s\n", message);
     }
 
     usleep(100000); // 100ms delay
