@@ -113,6 +113,7 @@ void imuConfig() {
             GYRO_RANGE << 3); // sets up the range of gyroscope
   i2c_write(adr_mpu, 0x1c, ACCEL_RANGE << 3);
 }
+
 void getRawGyro(int *roll, int *pitch, int *yaw) {
   uint16_t x = (i2c_read(adr_mpu, 0x43) << 8); // read high byte
   x |= i2c_read(adr_mpu, 0x44); // read low byte and add to high one
