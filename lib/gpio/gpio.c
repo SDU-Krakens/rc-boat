@@ -13,6 +13,7 @@ void gpio_export(gpio_t *gpio) {
   gpio->fd = open(path, O_WRONLY);
   if (gpio->fd < 0) {
     free(path);
+    printf("Failed to open GPIO export file\n");
     return;
   }
 
