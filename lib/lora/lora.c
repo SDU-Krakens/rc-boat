@@ -221,6 +221,8 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
   lora_write_reg(lora, REG_IRQ_FLAGS, 0xFF);
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
+  usleep(1000);
+
   long long start = get_time_ms();
   while (true) {
     uint8_t irq = lora_read_reg(lora, REG_IRQ_FLAGS);
