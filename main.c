@@ -66,9 +66,7 @@ int main(void) {
     // head = gps->loc.course;
 
     getRawAcc(&accel_x, &accel_y, &accel_z);
-    printf("raw accel\n");
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
-    printf("raw gyro\n");
 
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
@@ -79,8 +77,10 @@ int main(void) {
     //  lora_send(lora, message, message_len, 1000);
 
     // pinnt accel variables
-    printf("accel: %f\n", accel);
-    printf("tilt: %d\n", tilt);
+    printf("accel: %f ", accel);
+    printf("tilt: %d ", tilt);
+    printf("raw accel: %d %d %d ", accel_x, accel_y, accel_z);
+    printf("raw gyro: %d %d %d\n", gyro_roll, gyro_pitch, gyro_yaw);
   }
 
   return 0;
