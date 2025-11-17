@@ -59,7 +59,7 @@ int main(void) {
 
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
-  lora_set_spreading_factor(lora, 12);
+  lora_set_spreading_factor(lora, 7);
   lora_set_coding_rate(lora, 8);
   lora_enable_crc(lora, true);
   lora_set_tx_power(lora, 17);
