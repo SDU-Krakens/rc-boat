@@ -15,7 +15,7 @@ size_t format_packet(char *message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr);
 
-char *message = NULL;
+char *message = "";
 size_t message_len = 0;
 int temp1 = 0;
 int temp2 = 0;
@@ -66,7 +66,9 @@ int main(void) {
     // head = gps->loc.course;
 
     getRawAcc(&accel_x, &accel_y, &accel_z);
+    printf("raw accel\n");
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
+    printf("raw gyro\n");
 
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
@@ -74,6 +76,7 @@ int main(void) {
     message_len = format_packet(message, temp1, temp2, temp3, accel, lat, lon,
                                 bat, watt, tilt, head, curr);
     // lora_send(lora, message, message_len, 1000);
+    printf("sent\n");
 
     printf("%s", message);
   }
