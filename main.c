@@ -57,7 +57,7 @@ int main(void) {
   // Initialize IMU
   imuConfig();
 
-  lora_set_frequency(lora, 10);
+  lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
   lora_set_spreading_factor(lora, 12);
   lora_set_coding_rate(lora, 8);
