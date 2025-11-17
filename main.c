@@ -98,9 +98,6 @@ int main(void) {
     } else {
       printf("Failed to format packet\n");
     }
-
-    // Add delay to avoid CPU overuse
-    usleep(5000000); // Sleep for 1 second
   }
 
   if (message)
