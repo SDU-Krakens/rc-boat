@@ -38,8 +38,8 @@ gpio_t *gpio_open(uint32_t pin) {
 }
 
 void gpio_close(gpio_t *gpio) {
-  free(gpio);
   close(gpio->fd);
+  free(gpio);
 }
 
 void gpio_set_direction(gpio_t *gpio, bool direction) {
