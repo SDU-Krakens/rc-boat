@@ -38,7 +38,7 @@ int gyro_pitch = 0;
 int gyro_yaw = 0;
 
 int main(void) {
-  lora_t *lora = lora_init("/dev/spidev0.0", 1000000);
+  lora_t *lora = lora_init("/dev/spidev0.0", 1000000, 22);
   if (lora == NULL) {
     return 1;
   }
