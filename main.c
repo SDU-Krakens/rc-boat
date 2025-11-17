@@ -77,13 +77,16 @@ int main(void) {
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
 
+    message = "hello";
+
     if (message) {
       free(message); // Free previous allocation
       message = NULL;
     }
 
-    message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
-                                bat, watt, tilt, head, curr);
+    // message_len = format_packet(&message, temp1, temp2, temp3, accel, lat,
+    // lon,
+    //                             bat, watt, tilt, head, curr);
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, 15000);
