@@ -127,7 +127,7 @@ void lora_set_bandwith(lora_t *lora, uint32_t bw) {
     bw_index = 8;
 
   uint8_t config = lora_read_reg(lora, REG_MODEM_CONFIG1);
-  config = (config & 0xFC) | (bw_index << 4);
+  config = (config & 0x0F) | (bw_index << 4);
 
   lora_write_reg(lora, REG_MODEM_CONFIG1, config);
 }
