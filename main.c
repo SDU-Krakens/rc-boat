@@ -99,7 +99,7 @@ int main(void) {
     }
 
     // Add delay to avoid CPU overuse
-    usleep(5000000); // Sleep for 1 second
+    usleep(1000000); // Sleep for 1 second
   }
 
   if (message)
