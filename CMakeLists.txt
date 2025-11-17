@@ -34,7 +34,11 @@ target_include_directories(lora PUBLIC lib/lora)
 add_library(spi lib/spi/spi.c)
 target_include_directories(spi PUBLIC lib/spi)
 
-target_link_libraries(rc-boat gps uart mpu6050 lora spi)
+# GPIO
+add_library(gpio lib/gpio/gpio.c)
+target_include_directories(gpio PUBLIC lib/gpio)
+
+target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)
