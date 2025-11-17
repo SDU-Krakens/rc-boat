@@ -241,16 +241,18 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
     uint8_t irq = lora_read_reg(lora, REG_IRQ_FLAGS);
 
     if (irq & IRQ_TX_DONE_MASK) {
+      lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+      usleep(2000);
       lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
       return true;
     }
 
     if (get_time_ms() - start > timeout_ms) {
+      lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+      usleep(2000);
       return false;
     }
 
     usleep(5000);
   }
-  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
-  usleep(2000);
 }
