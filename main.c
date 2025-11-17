@@ -59,7 +59,7 @@ int main(void) {
   // lora_set_tx_power(lora, 17);
   printf("hello\n");
 
-  for (;;) {
+  while (1) {
     // gps_location(gps);
     // lat = gps->loc.lat;
     // lon = gps->loc.lon;
