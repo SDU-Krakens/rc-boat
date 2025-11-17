@@ -78,14 +78,14 @@ int main(void) {
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
 
-    message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
-    strcpy(message, "hello");
-    message_len = strlen(message);
-
     if (message) {
       free(message); // Free previous allocation
       message = NULL;
     }
+
+    message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
+    strcpy(message, "hello");
+    message_len = strlen(message);
 
     // message_len = format_packet(&message, temp1, temp2, temp3, accel, lat,
     // lon,
