@@ -223,6 +223,9 @@ long long get_time_ms() {
 
 bool lora_send(lora_t *lora, const char *data, uint8_t len,
                uint16_t timeout_ms) {
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+  usleep(2000);
+
   lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0);
   lora_write_reg(lora, REG_FIFO_ADDR_PTR, 0);
 
@@ -232,8 +235,8 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
   }
   lora_write_reg(lora, REG_PAYLOAD_LENGTH, len);
   lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
-  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
   usleep(2000);
 
   long long start = get_time_ms();
@@ -243,6 +246,7 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
     if (irq & IRQ_TX_DONE_MASK) {
       lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
       usleep(2000);
+
       lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
       return true;
     }
