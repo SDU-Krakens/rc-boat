@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../gpio/gpio.h"
 #include "../spi/spi.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,7 +13,7 @@ typedef struct {
   uint16_t coding_rate;
   bool crc_enabled;
   int tx_power;
-  uint8_t reset_pin;
+  gpio_t *reset;
 } lora_t;
 
 // Setup & initialization

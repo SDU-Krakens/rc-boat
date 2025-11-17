@@ -30,7 +30,13 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   }
 
   // Setup GPIO
-  lora->reset_pin = reset_pin;
+  lora->reset = gpio_open(reset_pin);
+  gpio_set_direction(lora->reset, GPIO_OUTPUT);
+
+  gpio_set_value(lora->reset, 0);
+  usleep(10000);
+  gpio_set_value(lora->reset, 1);
+  usleep(10000);
 
   lora->spi = spi_init(spi_dev, spi_speed_hz, 0);
   if (!lora->spi) {
@@ -38,11 +44,7 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
     return NULL;
   }
 
-  spi_write(lora->spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
-  usleep(1000);
-  spi_write(lora->spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
-
-  uint8_t ver = spi_read(lora->spi, REG_VERSION);
+  uint8_t ver = lora_read_reg(lora, REG_VERSION);
   if (ver != 0x12) {
     printf("spi_init: wrong version %x\n", ver);
     exit(1);
