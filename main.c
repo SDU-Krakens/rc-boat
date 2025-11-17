@@ -15,7 +15,6 @@ size_t format_packet(char *message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr);
 
-char *message = "";
 size_t message_len = 0;
 int temp1 = 0;
 int temp2 = 0;
@@ -39,15 +38,17 @@ int gyro_pitch = 0;
 int gyro_yaw = 0;
 
 int main(void) {
-  // lora_t *lora = lora_init("/dev/spidev0.0", 1000000);
-  // if (lora == NULL) {
-  //   return 1;
-  // }
+  lora_t *lora = lora_init("/dev/spidev0.0", 1000000);
+  if (lora == NULL) {
+    return 1;
+  }
 
   // gps_t *gps = gps_init();
   // if (gps == NULL) {
   //   return 1;
   // }
+
+  char message[2048];
 
   imuConfig();
 
@@ -71,10 +72,9 @@ int main(void) {
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
 
-    // message_len = format_packet(message, temp1, temp2, temp3, accel, lat,
-    // lon,
-    //                             bat, watt, tilt, head, curr);
-    //  lora_send(lora, message, message_len, 1000);
+    message_len = format_packet(message, temp1, temp2, temp3, accel, lat, lon,
+                                bat, watt, tilt, head, curr);
+    lora_send(lora, message, message_len, 1000);
 
     // pinnt accel variables
     printf("accel: %f ", accel);
