@@ -25,8 +25,8 @@ add_library(uart lib/uart/uart.c)
 target_include_directories(uart PUBLIC lib/uart)
 
 # IMU
-add_library(imu lib/imu/imu.c)
-target_include_directories(imu PUBLIC lib/imu)
+add_library(imu lib/imu/mpu6050.c)
+target_include_directories(imu PUBLIC lib/mpu6050)
 
 # LoRa + SPI
 add_library(lora lib/lora/lora.c)
