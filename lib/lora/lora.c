@@ -210,24 +210,34 @@ long long get_time_ms() {
 
 bool lora_send(lora_t *lora, const char *data, uint8_t len,
                uint16_t timeout_ms) {
+  // Set FIFO base and pointer
   lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0);
   lora_write_reg(lora, REG_FIFO_ADDR_PTR, 0);
 
-  // Write all data bytes to FIFO
+  // Write payload to FIFO
   for (uint8_t i = 0; i < len; i++) {
     lora_write_reg(lora, REG_FIFO, (uint8_t)data[i]);
   }
+
+  // Set payload length
   lora_write_reg(lora, REG_PAYLOAD_LENGTH, len);
-  lora_write_reg(lora, REG_IRQ_FLAGS, 0xFF);
+
+  // Clear only relevant IRQ flags (TXDone)
+  lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+
+  // Switch to TX mode
   lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
-  usleep(10000);
+  // Short delay to let TX mode latch
+  usleep(2000); // 2 ms
 
   long long start = get_time_ms();
+
   while (true) {
     uint8_t irq = lora_read_reg(lora, REG_IRQ_FLAGS);
 
     if (irq & IRQ_TX_DONE_MASK) {
+      // Clear TXDone flag
       lora_write_reg(lora, REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
       return true;
     }
@@ -236,6 +246,6 @@ bool lora_send(lora_t *lora, const char *data, uint8_t len,
       return false;
     }
 
-    usleep(10000);
+    usleep(5000); // poll every 5 ms
   }
 }
