@@ -8,23 +8,22 @@
 
 void gpio_export(gpio_t *gpio) {
   char *path;
-  asprintf(&path, "%s/gpiochip%d/export", GPIO_PATH, GPIO_OFFSET);
+  asprintf(&path, "%s/export", GPIO_PATH); // Remove gpiochip%d part
 
   gpio->fd = open(path, O_WRONLY);
   if (gpio->fd < 0) {
+    free(path);
     return;
   }
 
   char buf[8];
-  sprintf(buf, "%d", gpio->pin);
+  sprintf(buf, "%d", gpio->pin + GPIO_OFFSET); // Add offset here
   write(gpio->fd, buf, strlen(buf));
   close(gpio->fd);
   free(path);
-  path = NULL;
 
   gpio->exported = true;
 }
-
 gpio_t *gpio_open(uint32_t pin) {
   gpio_t *gpio = malloc(sizeof(gpio_t));
   gpio->pin = pin;
@@ -99,14 +98,19 @@ bool gpio_get_value(gpio_t *gpio) {
 
   int fd = open(path, O_RDONLY);
   if (fd < 0) {
+    free(path);
     return false;
   }
 
   char buf[64];
-  read(fd, buf, 2);
+  ssize_t bytes = read(fd, buf, 2);
   close(fd);
   free(path);
-  path = NULL;
 
-  return true;
+  if (bytes <= 0) {
+    return false;
+  }
+
+  // Actually parse the value!
+  return (buf[0] == '1');
 }

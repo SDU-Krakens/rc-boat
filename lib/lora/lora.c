@@ -70,9 +70,9 @@ void lora_end(lora_t *lora) {
 void lora_set_frequency(lora_t *lora, uint32_t frequency) {
   lora->frequency = frequency;
   uint64_t frf = ((uint64_t)frequency << 19) / 32000000;
-  spi_write(lora->spi, REG_FRF_MSB, (frf >> 16));
-  spi_write(lora->spi, REG_FRF_MID, (frf >> 8));
-  spi_write(lora->spi, REG_FRF_LSB, (frf >> 0));
+  lora_write_reg(lora, REG_FRF_MSB, (frf >> 16));
+  lora_write_reg(lora, REG_FRF_MID, (frf >> 8));
+  lora_write_reg(lora, REG_FRF_LSB, (frf >> 0));
 }
 
 void lora_set_spreading_factor(lora_t *lora, uint16_t sf) {
@@ -207,12 +207,12 @@ long long get_time_ms() {
 
 bool lora_send(lora_t *lora, const char *data, uint8_t len,
                uint16_t timeout_ms) {
-  spi_write(lora->spi, REG_FIFO_TX_BASE_ADDR, 0);
-  spi_write(lora->spi, REG_FIFO_ADDR_PTR, 0);
+  lora_write_reg(lora, REG_FIFO_TX_BASE_ADDR, 0);
+  lora_write_reg(lora, REG_FIFO_ADDR_PTR, 0);
   spi_write_array(lora->spi, REG_FIFO, (uint8_t *)data, len);
-  spi_write(lora->spi, REG_PAYLOAD_LENGTH, len);
-  spi_write(lora->spi, REG_IRQ_FLAGS, 0xFF);
-  spi_write(lora->spi, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
+  lora_write_reg(lora, REG_PAYLOAD_LENGTH, len);
+  lora_write_reg(lora, REG_IRQ_FLAGS, 0xFF);
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX);
 
   long long start = get_time_ms();
   while (true) {

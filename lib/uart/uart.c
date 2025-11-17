@@ -54,18 +54,25 @@ size_t uart_send(uart_t *uart, char *buf, uint16_t len) {
 size_t uart_read(uart_t *uart, char *buf, uint16_t len) {
   char c;
   char *b = buf;
-  // size_t rx_len = -1;
-  size_t total_len = -1;
-  while (1) {
-    // rx_len =
-    read(uart->fd, (void *)(&c), 1);
+  size_t total_len = 0;
+
+  while (total_len < len - 1) { // Leave room for null terminator
+    ssize_t rx_len = read(uart->fd, (void *)(&c), 1);
+
+    if (rx_len <= 0) {
+      usleep(1000); // Wait a bit if no data
+      continue;
+    }
 
     if (c == '\n') {
-      *b++ = '\0';
+      *b = '\0';
       break;
     }
+
     *b++ = c;
-    total_len += len;
+    total_len++;
   }
+
+  *b = '\0'; // Ensure null termination
   return total_len;
 }

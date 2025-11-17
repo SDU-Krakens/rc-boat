@@ -11,7 +11,7 @@
 #define GPS_BAUDRATE 115200
 #define GPS_TIMEOUT 1000
 
-size_t format_packet(char *message, int temp1, int temp2, int temp3,
+size_t format_packet(char **message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr);
 
@@ -40,15 +40,11 @@ int gyro_yaw = 0;
 int main(void) {
   lora_t *lora = lora_init("/dev/spidev0.0", 8000000, 22);
   if (lora == NULL) {
+    printf("Failed to init LoRa\n");
     return 1;
   }
 
-  // gps_t *gps = gps_init();
-  // if (gps == NULL) {
-  //   return 1;
-  // }
-
-  char message[2048];
+  char *message = NULL; // Change to pointer
 
   imuConfig();
 
@@ -58,38 +54,42 @@ int main(void) {
   lora_set_coding_rate(lora, 8);
   lora_enable_crc(lora, true);
   lora_set_tx_power(lora, 17);
-  printf("hello\n");
+  printf("LoRa initialized\n");
 
   while (1) {
-    // gps_location(gps);
-    // lat = gps->loc.lat;
-    // lon = gps->loc.lon;
-    // head = gps->loc.course;
-
     getRawAcc(&accel_x, &accel_y, &accel_z);
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;
 
-    message_len = format_packet(message, temp1, temp2, temp3, accel, lat, lon,
-                                bat, watt, tilt, head, curr);
-    lora_send(lora, message, message_len, 1000);
+    if (message) {
+      free(message); // Free previous allocation
+      message = NULL;
+    }
 
-    // pinnt accel variables
-    printf("accel: %f ", accel);
-    printf("tilt: %d ", tilt);
-    printf("raw accel: %d %d %d ", accel_x, accel_y, accel_z);
-    printf("raw gyro: %d %d %d\n", gyro_roll, gyro_pitch, gyro_yaw);
+    message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
+                                bat, watt, tilt, head, curr);
+
+    if (message_len > 0 && message) {
+      bool sent = lora_send(lora, message, message_len, 1000);
+      printf("accel: %f tilt: %d raw: %d %d %d gyro: %d %d %d sent: %d\n",
+             accel, tilt, accel_x, accel_y, accel_z, gyro_roll, gyro_pitch,
+             gyro_yaw, sent);
+    }
+
+    usleep(100000); // 100ms delay
   }
 
+  if (message)
+    free(message);
+  lora_end(lora);
   return 0;
 }
-
-size_t format_packet(char *message, int temp1, int temp2, int temp3,
+size_t format_packet(char **message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
                      int tilt, int head, int curr) {
-  return asprintf(&message,
+  return asprintf(message,
                   "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
                   "%d,head %d,cur %d",
                   temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head,
