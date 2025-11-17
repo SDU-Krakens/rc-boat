@@ -61,6 +61,8 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   lora->coding_rate = 5;
   lora->crc_enabled = true;
   lora->tx_power = 17;
+
+  lora_write_reg(lora, REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
   return lora;
 }
 
