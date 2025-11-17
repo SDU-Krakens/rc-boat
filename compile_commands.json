@@ -13,9 +13,9 @@
 },
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/build",
-  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/imu  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/imu.dir/lib/imu/imu.c.o -c /home/vizn3r/dev/kraken/rc-boat/lib/imu/imu.c",
-  "file": "/home/vizn3r/dev/kraken/rc-boat/lib/imu/imu.c",
-  "output": "CMakeFiles/imu.dir/lib/imu/imu.c.o"
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/imu  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/mpu6050.dir/lib/imu/mpu6050.c.o -c /home/vizn3r/dev/kraken/rc-boat/lib/imu/mpu6050.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/lib/imu/mpu6050.c",
+  "output": "CMakeFiles/mpu6050.dir/lib/imu/mpu6050.c.o"
 },
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/build",

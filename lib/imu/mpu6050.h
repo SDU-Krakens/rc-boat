@@ -21,33 +21,16 @@
 #define ACCEL_RANGE                                                            \
   0 // Select which accelerometer range to use (see the table below) -
     // Default is 0
-//	Accelerometer Range
-//	0	+/- 2g
-//	1	+/- 4g
-//	2	+/- 8g
-//	3	+/- 16g
-// See the MPU6000 Register Map for more information
+    //	Accelerometer Range
+    //	0	+/- 2g
+    //	1	+/- 4g
+    //	2	+/- 8g
+    //	3	+/- 16g
+    // See the MPU6000 Register Map for more information
 
-// global variables vv
-// /* Defines the rang of values the gyro will suply.
-//  * The allowed values are in +- degrees/second:
-//  * 250
-//  * 500
-//  * 1000
-//  * 2000
-//  */
-// u_int8_t gyroScale = 250; // [+- deg/s]
-//
-// /* Defines the range of values the accelerometer will suply.
-//  * The allowed values are in +- g (multiplies of ~9.81m/s/s):
-//  * 2
-//  * 4
-//  * 8
-//  * 16
-//  */
-// u_int8_t accelerometerScale = 2; // [+- g]
-
-u_int8_t dlpf = 0; // 3bit // changes depending on the bandwidth and delay of
-                   // gyro and accelerometer (see register map page 13)
-u_int8_t ext_synq = 0;     // 3bit // no syncing
-u_int8_t sample_rate = 10; // [kHz]
+int i2c_read(char adr_slave, char adr_register);
+void getRawAcc(int *xx, int *yy, int *zz);
+void getRawGyro(int *roll, int *pitch, int *yaw);
+void imuConfig();
+int i2c_write(char adr_slave, char adr_register, char data);
+void get_unfil_gyro(float *roll, float *pitch, float *yaw);

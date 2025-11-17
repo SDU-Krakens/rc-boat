@@ -25,8 +25,8 @@ add_library(uart lib/uart/uart.c)
 target_include_directories(uart PUBLIC lib/uart)
 
 # IMU
-add_library(imu lib/imu/mpu6050.c)
-target_include_directories(imu PUBLIC lib/mpu6050)
+add_library(mpu6050 lib/imu/mpu6050.c)
+target_include_directories(mpu6050 PUBLIC lib/imu)
 
 # LoRa + SPI
 add_library(lora lib/lora/lora.c)
@@ -34,7 +34,7 @@ target_include_directories(lora PUBLIC lib/lora)
 add_library(spi lib/spi/spi.c)
 target_include_directories(spi PUBLIC lib/spi)
 
-target_link_libraries(rc-boat gps uart imu lora spi)
+target_link_libraries(rc-boat gps uart mpu6050 lora spi)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)

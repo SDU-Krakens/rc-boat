@@ -4,28 +4,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char i2c_read(char adr_slave, char adr_register);
-void getRawAcc(int *xx, int *yy, int *zz);
-void getRawGyro(int *roll, int *pitch, int *yaw);
-void imuConfig();
-int i2c_write(char adr_slave, char adr_register, char data);
-void get_unfil_gyro(float *roll, float *pitch, float *yaw);
+// int main() {
+//   int test = i2c_read(adr_mpu, 0x26);
+//   imuConfig();
+//   printf("test: %d\n", test);
+//   float x, y, z;
+//   getRawAcc(&x, &y, &z);
+//   printf("\n%f, %f, %f", x, y, z);
+//   i2c_write(adr_mpu, 0x26, 0xaa);
+//   printf("\n%d", i2c_read(adr_mpu, 0x26));
+//   printf("\n\n");
+//   return 0;
+// }
 
-int main() {
-  int test = i2c_read(adr_mpu, 0x26);
-  imuConfig();
-  printf("test: %d\n", test);
-  float x, y, z;
-  getRawAcc(&x, &y, &z);
-  printf("\n%f, %f, %f", x, y, z);
-  i2c_write(adr_mpu, 0x26, 0xaa);
-  printf("\n%d", i2c_read(adr_mpu, 0x26));
-  printf("\n\n");
-  return 0;
-}
+// global variables vv
+// /* Defines the rang of values the gyro will suply.
+//  * The allowed values are in +- degrees/second:
+//  * 250
+//  * 500
+//  * 1000
+//  * 2000
+//  */
+u_int8_t gyro_scale; // [+- deg/s]
+                     //
+// /* Defines the range of values the accelerometer will suply.
+//  * The allowed values are in +- g (multiplies of ~9.81m/s/s):
+//  * 2
+//  * 4
+//  * 8
+//  * 16
+//  */
+u_int8_t accelerometerScale; // [+- g]
 
-char i2c_read(char adr_slave, char adr_register) {
-  char result = -1;
+u_int8_t dlpf;        // 3bit // changes depending on the bandwidth and delay of
+                      // gyro and accelerometer (see register map page 13)
+u_int8_t ext_synq;    // 3bit // no syncing
+u_int8_t sample_rate; // [kHz]
+
+int i2c_read(char adr_slave, char adr_register) {
+  int result = -1;
   char *string;
   if (0 > asprintf(&string, "i2cget -y 1 %d %d", adr_slave, adr_register))
     return -1;
@@ -93,12 +110,12 @@ void imuConfig() {
   i2c_write(adr_mpu, 0x1c, ACCEL_RANGE << 3);
 }
 void getRawGyro(int *roll, int *pitch, int *yaw) {
-  u_int16_t x = (i2c_read(adr, 0x43) << 8); // read high byte
-  x |= i2c_read(adr, 0x44);                 // read low byte and add to high one
-  u_int16_t y = (i2c_read(adr, 0x45) << 8);
-  y |= i2c_read(adr, 0x46);
-  u_int16_t z = (i2c_read(adr, 0x47) << 8);
-  z |= i2c_read(adr, 0x48);
+  u_int16_t x = (i2c_read(adr_mpu, 0x43) << 8); // read high byte
+  x |= i2c_read(adr_mpu, 0x44); // read low byte and add to high one
+  u_int16_t y = (i2c_read(adr_mpu, 0x45) << 8);
+  y |= i2c_read(adr_mpu, 0x46);
+  u_int16_t z = (i2c_read(adr_mpu, 0x47) << 8);
+  z |= i2c_read(adr_mpu, 0x48);
   *roll = (int)x; // change into int and return
   *pitch = (int)y;
   *yaw = (int)z;
@@ -107,6 +124,7 @@ void get_unfil_gyro(
     float *roll, float *pitch,
     float *yaw) { // fills the provided float pointers with unfiltered
                   // angular speed in deg/s using the gyro_scale
+  (void)yaw;
   int x, y, z;
   getRawGyro(&x, &y, &z);
   *roll = (((float)x - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);

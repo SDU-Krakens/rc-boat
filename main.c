@@ -1,7 +1,15 @@
-#include "gps.h"
+// #include "gps.h"
+// #include "lib/imu/mpu6050.h"
 #include "lora.h"
+#include "mpu6050.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+#define GPS_BAUDRATE 115200
+#define GPS_TIMEOUT 1000
 
 size_t format_packet(char *message, int temp1, int temp2, int temp3,
                      float accel, double lat, double lon, float bat, float watt,
@@ -21,16 +29,27 @@ int tilt = 0;
 int head = 0;
 int curr = 0;
 
+// IMU stuff
+int accel_x = 0;
+int accel_y = 0;
+int accel_z = 0;
+
+int gyro_roll = 0;
+int gyro_pitch = 0;
+int gyro_yaw = 0;
+
 int main(void) {
   lora_t *lora = lora_init("/dev/spidev0.0", 1000000);
   if (lora == NULL) {
     return 1;
   }
 
-  gps_t *gps = gps_init();
-  if (gps == NULL) {
-    return 1;
-  }
+  // gps_t *gps = gps_init();
+  // if (gps == NULL) {
+  //   return 1;
+  // }
+
+  imuConfig();
 
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
@@ -40,14 +59,24 @@ int main(void) {
   lora_set_tx_power(lora, 17);
 
   for (;;) {
-    gps_location(gps);
-    lat = gps->loc.lat;
-    lon = gps->loc.lon;
-    head = gps->loc.course;
+    // gps_location(gps);
+    // lat = gps->loc.lat;
+    // lon = gps->loc.lon;
+    // head = gps->loc.course;
+
+    getRawAcc(&accel_x, &accel_y, &accel_z);
+    getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
+
+    accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
+    tilt = gyro_pitch;
 
     message_len = format_packet(message, temp1, temp2, temp3, accel, lat, lon,
                                 bat, watt, tilt, head, curr);
-    lora_send(lora, message, message_len, 1000);
+    // lora_send(lora, message, message_len, 1000);
+
+    printf("%s", message);
+
+    sleep(1);
   }
 
   return 0;
