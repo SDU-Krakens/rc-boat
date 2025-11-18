@@ -23,6 +23,8 @@ add_library(gps lib/gps/gps.c)
 target_include_directories(gps PUBLIC lib/gps)
 add_library(uart lib/uart/uart.c)
 target_include_directories(uart PUBLIC lib/uart)
+add_library(nmea lib/gps/nmea.c)
+target_include_directories(nmea PUBLIC lib/gps)
 
 # IMU
 add_library(mpu6050 lib/imu/mpu6050.c)
@@ -38,7 +40,7 @@ target_include_directories(spi PUBLIC lib/spi)
 add_library(gpio lib/gpio/gpio.c)
 target_include_directories(gpio PUBLIC lib/gpio)
 
-target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio)
+target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio nmea)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)

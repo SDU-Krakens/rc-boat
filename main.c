@@ -1,4 +1,4 @@
-// #include "gps.h"
+#include "gps.h"
 #include "lora.h"
 #include "mpu6050.h"
 #include <math.h>
@@ -47,12 +47,12 @@ int main(void) {
   char *message = NULL; // Change to pointer
 
   // Initialize GPS
-  // gps_t *gps = gps_init();
-  // if (gps == NULL) {
-  //  printf("Failed to init GPS\n");
-  //  lora_end(lora);
-  //  return 1;
-  //}
+  gps_t *gps = gps_init();
+  if (gps == NULL) {
+    printf("Failed to init GPS\n");
+    lora_end(lora);
+    return 1;
+  }
 
   // Initialize IMU
   imuConfig();
@@ -67,9 +67,9 @@ int main(void) {
 
   while (1) {
     // Read GPS data
-    // gps_location(gps);
-    // lat = gps->loc.lat;
-    // lon = gps->loc.lon;
+    gps_location(gps);
+    lat = gps->loc.lat;
+    lon = gps->loc.lon;
 
     // Read IMU data
     getRawAcc(&accel_x, &accel_y, &accel_z);
@@ -83,10 +83,6 @@ int main(void) {
       message = NULL;
     }
 
-    // message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
-    // strcpy(message, "hello");
-    // message_len = strlen(message);
-
     message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
                                 bat, watt, tilt, head, curr);
 
@@ -99,7 +95,7 @@ int main(void) {
     }
 
     // Add delay to avoid CPU overuse
-    usleep(1000000); // Sleep for 1 second
+    usleep(500000);
   }
 
   if (message)

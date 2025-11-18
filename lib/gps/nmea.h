@@ -1,8 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #define NMEA_STATUS_EMPTY 0x00
 #define NMEA_STATUS_COMPLETED 0x03
@@ -37,5 +35,6 @@ typedef struct {
 
 uint8_t nmea_get_message_type(const char *message);
 uint8_t nmea_valid_checksum(const char *message);
+
 void nmea_parse_gpgga(const char *message, gpgga_t *gpgga);
 void nmea_parse_gprmc(const char *message, gprmc_t *gprmc);
