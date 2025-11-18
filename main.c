@@ -83,10 +83,6 @@ int main(void) {
       message = NULL;
     }
 
-    // message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
-    // strcpy(message, "hello");
-    // message_len = strlen(message);
-
     message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
                                 bat, watt, tilt, head, curr);
 
@@ -99,7 +95,7 @@ int main(void) {
     }
 
     // Add delay to avoid CPU overuse
-    usleep(1000000); // Sleep for 1 second
+    usleep(500000);
   }
 
   if (message)
