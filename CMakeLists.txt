@@ -47,6 +47,9 @@ target_include_directories(spi PUBLIC lib/spi)
 add_library(gpio lib/gpio/gpio.c)
 target_include_directories(gpio PUBLIC lib/gpio)
 
+# Main exe
+target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio nmea)
+
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)
 
@@ -63,11 +66,6 @@ else()
   message(STATUS "math library not found, assuming it's in libc")
 endif()
 
-
-### EXECUTABLES
-
-# Main exe
-target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio nmea)
 
 if(BUILD_TESTS)
   # Tests
