@@ -18,6 +18,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Linux headers
+        run: sudo apt-get update && sudo apt-get install -y linux-headers-generic libi2c-dev libgpiod-dev
+
       - name: Prepare
         run: chmod +x ./test.sh
 
