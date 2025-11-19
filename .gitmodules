@@ -7,3 +7,6 @@
 [submodule "gps"]
 	path = gps
 	url = https://github.com/SDU-Krakens/gps-lib
+[submodule "lib/unity"]
+	path = lib/unity
+	url = https://github.com/ThrowTheSwitch/Unity
