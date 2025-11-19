@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/vizn3r/dev/kraken/rc-boat/dist/test/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

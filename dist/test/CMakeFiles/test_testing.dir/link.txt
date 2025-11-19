@@ -1,1 +1,0 @@
-/usr/bin/cc  -Wall -Wextra -O2 -DNDEBUG -Wl,--dependency-file=CMakeFiles/test_testing.dir/link.d CMakeFiles/test_testing.dir/test/test_testing.c.o -o test_testing  libunity.a libnmea.a libgps.a libuart.a libmpu6050.a liblora.a libspi.a libgpio.a
