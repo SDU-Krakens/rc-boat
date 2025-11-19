@@ -3,7 +3,7 @@ name: Run Tests
 on:
   push:
     branches:
-      - '*'   # or '*' to run on all branches
+      - '*'   # runs on all branches
   pull_request:
     branches:
       - main
@@ -18,10 +18,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
 
-      - name: Prepare
+      - name: Prepare test script
         run: chmod +x ./test.sh
 
       - name: Run tests
         run: ./test.sh
-
