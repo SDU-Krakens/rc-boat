@@ -6,6 +6,6 @@ mkdir -p dist/build
 cd dist/build
 
 cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../
-make
+cmake --build . -- -j$(nproc)
 
 cp ./compile_commands.json ../

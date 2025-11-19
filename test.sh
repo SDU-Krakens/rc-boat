@@ -5,6 +5,8 @@ cd dist/test
 
 cmake -DCMAKE_BUILD_TYPE=Test -DBUILD_TESTS=ON ../../
 cmake --build . -- -j$(nproc)
-ctest -V
 
 cp ./compile_commands.json ../../compile_commands.json
+
+ctest -V
+exit $?
