@@ -1,6 +1,12 @@
 [
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/dist/test",
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/gps  -Wall -Wextra -O2 -DNDEBUG -std=gnu17 -o CMakeFiles/gps.dir/lib/gps/gps.c.o -c /home/vizn3r/dev/kraken/rc-boat/lib/gps/gps.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/lib/gps/gps.c",
+  "output": "CMakeFiles/gps.dir/lib/gps/gps.c.o"
+},
+{
+  "directory": "/home/vizn3r/dev/kraken/rc-boat/dist/test",
   "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/gps  -Wall -Wextra -O2 -DNDEBUG -std=gnu17 -o CMakeFiles/nmea.dir/lib/gps/nmea.c.o -c /home/vizn3r/dev/kraken/rc-boat/lib/gps/nmea.c",
   "file": "/home/vizn3r/dev/kraken/rc-boat/lib/gps/nmea.c",
   "output": "CMakeFiles/nmea.dir/lib/gps/nmea.c.o"
@@ -10,12 +16,6 @@
   "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/uart  -Wall -Wextra -O2 -DNDEBUG -std=gnu17 -o CMakeFiles/uart.dir/lib/uart/uart.c.o -c /home/vizn3r/dev/kraken/rc-boat/lib/uart/uart.c",
   "file": "/home/vizn3r/dev/kraken/rc-boat/lib/uart/uart.c",
   "output": "CMakeFiles/uart.dir/lib/uart/uart.c.o"
-},
-{
-  "directory": "/home/vizn3r/dev/kraken/rc-boat/dist/test",
-  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/gps  -Wall -Wextra -O2 -DNDEBUG -std=gnu17 -o CMakeFiles/gps.dir/lib/gps/gps.c.o -c /home/vizn3r/dev/kraken/rc-boat/lib/gps/gps.c",
-  "file": "/home/vizn3r/dev/kraken/rc-boat/lib/gps/gps.c",
-  "output": "CMakeFiles/gps.dir/lib/gps/gps.c.o"
 },
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/dist/test",
