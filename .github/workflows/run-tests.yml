@@ -1,0 +1,24 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - '*'   # or '*' to run on all branches
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: alpine
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Prepare
+        run: chmod +x ./test.sh
+
+      - name: Run tests
+        run: ./test.sh
+
