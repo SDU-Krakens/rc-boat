@@ -78,7 +78,7 @@ if(BUILD_TESTS)
     get_filename_component(test_name ${test_file} NAME_WE)
     add_executable(${test_name} ${test_file})
     target_link_libraries(${test_name} unity nmea gps uart mpu6050 lora spi gpio m rt)
-    add_test(NAME ${test_name} COMMAND ${test_name})
+    add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)
   endforeach()
 endif()
 
