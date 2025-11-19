@@ -1,11 +1,11 @@
 #!/bin/bash
 
-BUILD_TYPE=${1:-Debug}
+BUILD_TYPE=${1:-Release}
 
-mkdir build
-cd build
+mkdir -p dist/build
+cd dist/build
 
-cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../../
 make
 
 cp ./compile_commands.json ../

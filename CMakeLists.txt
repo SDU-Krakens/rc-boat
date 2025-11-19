@@ -13,18 +13,24 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -DDEBUG")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Executable
+option(BUILD_TESTS "Build tests" OFF)
+
+# Main exe
 add_executable(rc-boat main.c)
 
-# Libraries
+### Libraries
+
+# Unity
+add_library(unity lib/unity/src/unity.c)
+target_include_directories(unity PUBLIC lib/unity/src)
 
 # GPS + UART
 add_library(gps lib/gps/gps.c)
 target_include_directories(gps PUBLIC lib/gps)
-add_library(uart lib/uart/uart.c)
-target_include_directories(uart PUBLIC lib/uart)
 add_library(nmea lib/gps/nmea.c)
 target_include_directories(nmea PUBLIC lib/gps)
+add_library(uart lib/uart/uart.c)
+target_include_directories(uart PUBLIC lib/uart)
 
 # IMU
 add_library(mpu6050 lib/imu/mpu6050.c)
@@ -40,11 +46,10 @@ target_include_directories(spi PUBLIC lib/spi)
 add_library(gpio lib/gpio/gpio.c)
 target_include_directories(gpio PUBLIC lib/gpio)
 
-target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio nmea)
-
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)
 
+# Find libraries
 if(RT_LIBRARY)
   target_link_libraries(rc-boat ${RT_LIBRARY})
 else()
@@ -55,6 +60,25 @@ if(M_LIBRARY)
   target_link_libraries(rc-boat ${M_LIBRARY})
 else()
   message(STATUS "math library not found, assuming it's in libc")
+endif()
+
+
+### EXECUTABLES
+
+# Main exe
+target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio nmea)
+
+if(BUILD_TESTS)
+  # Tests
+  enable_testing()
+
+  file(GLOB TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test/test_*.c")
+  foreach(test_file ${TEST_FILES})
+    get_filename_component(test_name ${test_file} NAME_WE)
+    add_executable(${test_name} ${test_file})
+    target_link_libraries(${test_name} unity nmea gps uart mpu6050 lora spi gpio)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+  endforeach()
 endif()
 
 # We don't need this yet

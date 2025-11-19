@@ -1,0 +1,2 @@
+/usr/bin/ar qc libspi.a CMakeFiles/spi.dir/lib/spi/spi.c.o
+/usr/bin/ranlib libspi.a

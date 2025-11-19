@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -O2 -DNDEBUG -Wl,--dependency-file=CMakeFiles/rc-boat.dir/link.d "CMakeFiles/rc-boat.dir/main.c.o" -o rc-boat  /usr/lib/librt.a -lm libgps.a libuart.a libmpu6050.a liblora.a libspi.a libgpio.a libnmea.a
