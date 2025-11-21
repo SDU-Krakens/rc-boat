@@ -33,9 +33,11 @@ target_include_directories(nmea PUBLIC lib/gps)
 add_library(uart lib/uart/uart.c)
 target_include_directories(uart PUBLIC lib/uart)
 
-# IMU
+# IMU + I2C
 add_library(mpu6050 lib/imu/mpu6050.c)
 target_include_directories(mpu6050 PUBLIC lib/imu)
+add_library(mpu6050 lib/i2c/i2c.c)
+target_include_directories(i2c PUBLIC lib/i2c)
 
 # LoRa + SPI
 add_library(lora lib/lora/lora.c)
@@ -47,8 +49,7 @@ target_include_directories(spi PUBLIC lib/spi)
 add_library(gpio lib/gpio/gpio.c)
 target_include_directories(gpio PUBLIC lib/gpio)
 
-# Main exe
-target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio nmea)
+target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio i2c nmea)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)
