@@ -27,7 +27,7 @@ void gps_location(gps_t *gps) {
 
     switch (nmea_get_message_type(buf)) {
     case NMEA_GPGGA:
-      // nmea_parse_gpgga(buf, &gpgga);
+      nmea_parse_gpgga(buf, &gpgga);
 
       gps_convert_deg_to_dec(&gpgga.latitude, gpgga.lat, &gpgga.longitude,
                              gpgga.lon);
@@ -39,7 +39,7 @@ void gps_location(gps_t *gps) {
       status |= NMEA_GPGGA;
       break;
     case NMEA_GPRMC:
-      // nmea_parse_gprmc(buf, &gprmc);
+      nmea_parse_gprmc(buf, &gprmc);
 
       gps->loc.speed = gprmc.speed;
       gps->loc.course = gprmc.course;

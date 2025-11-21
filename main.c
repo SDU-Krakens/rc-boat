@@ -1,4 +1,4 @@
-// #include "gps.h"
+#include "gps.h"
 #include "lora.h"
 #include "mpu6050.h"
 #include <math.h>
@@ -11,9 +11,9 @@
 #define GPS_BAUDRATE 115200
 #define GPS_TIMEOUT 1000
 
-size_t format_packet(char **message, int temp1, int temp2, int temp3,
+size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
-                     int tilt, int head, int curr);
+                     int tilt, int head);
 
 size_t message_len = 0;
 int temp1 = 0;
@@ -27,6 +27,7 @@ float watt = 0.0;
 int tilt = 0;
 int head = 0;
 int curr = 0;
+int volt = 0;
 
 // IMU stuff
 int accel_x = 0;
@@ -47,12 +48,12 @@ int main(void) {
   char *message = NULL; // Change to pointer
 
   // Initialize GPS
-  // gps_t *gps = gps_init();
-  // if (gps == NULL) {
-  //  printf("Failed to init GPS\n");
-  //  lora_end(lora);
-  //  return 1;
-  //}
+  gps_t *gps = gps_init();
+  if (gps == NULL) {
+    printf("Failed to init GPS\n");
+    lora_end(lora);
+    return 1;
+  }
 
   // Initialize IMU
   imuConfig();
@@ -67,9 +68,9 @@ int main(void) {
 
   while (1) {
     // Read GPS data
-    // gps_location(gps);
-    // lat = gps->loc.lat;
-    // lon = gps->loc.lon;
+    gps_location(gps);
+    lat = gps->loc.lat;
+    lon = gps->loc.lon;
 
     // Read IMU data
     getRawAcc(&accel_x, &accel_y, &accel_z);
@@ -83,12 +84,8 @@ int main(void) {
       message = NULL;
     }
 
-    // message = (char *)malloc(sizeof(char) * (strlen("hello") + 1));
-    // strcpy(message, "hello");
-    // message_len = strlen(message);
-
-    message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
-                                bat, watt, tilt, head, curr);
+    message_len = format_packet(&message, temp1, temp2, temp3, volt, accel, lat,
+                                lon, bat, watt, tilt, head);
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, 15000);
@@ -99,7 +96,7 @@ int main(void) {
     }
 
     // Add delay to avoid CPU overuse
-    usleep(1000000); // Sleep for 1 second
+    usleep(500000);
   }
 
   if (message)
@@ -109,13 +106,15 @@ int main(void) {
   return 0;
 }
 
-size_t format_packet(char **message, int temp1, int temp2, int temp3,
+size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
-                     int tilt, int head, int curr) {
-  int result = asprintf(
-      message,
-      "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
-      "%d,head %d,cur %d",
-      temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head, curr);
+                     int tilt, int head) {
+  int result =
+      asprintf(message,
+               "t1 %d,t2 %d,t3 %d, voltage %d, lat %f,lon %f, acceleration %d, "
+               "current %d,water %d,tilt "
+               "%d,heading %d",
+               temp1, temp2, temp3, volt, lat, lon, (int)accel, (int)bat,
+               (int)watt, tilt, head);
   return (result >= 0) ? (size_t)result : 0;
 }

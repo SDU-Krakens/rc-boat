@@ -23,6 +23,8 @@ void gpio_export(gpio_t *gpio) {
   close(gpio->fd);
   free(path);
 
+  printf("Exported GPIO %d\n", gpio->pin);
+
   gpio->exported = true;
 }
 
@@ -42,6 +44,8 @@ void gpio_unexport(gpio_t *gpio) {
   write(gpio->fd, buf, strlen(buf));
   close(gpio->fd);
   free(path);
+
+  printf("Unexported GPIO %d\n", gpio->pin);
 
   gpio->exported = true;
 }
@@ -86,6 +90,9 @@ void gpio_set_direction(gpio_t *gpio, bool direction) {
   close(fd);
   free(path);
   path = NULL;
+
+  printf("Set GPIO %d direction to %s\n", gpio->pin,
+         direction ? "input" : "output");
 }
 
 void gpio_set_value(gpio_t *gpio, bool value) {
@@ -109,6 +116,8 @@ void gpio_set_value(gpio_t *gpio, bool value) {
   close(fd);
   free(path);
   path = NULL;
+
+  printf("Set GPIO %d value to %d\n", gpio->pin, value);
 }
 
 bool gpio_get_value(gpio_t *gpio) {
@@ -133,6 +142,8 @@ bool gpio_get_value(gpio_t *gpio) {
   if (bytes <= 0) {
     return false;
   }
+
+  printf("Read GPIO %d value: %s\n", gpio->pin, buf);
 
   // Actually parse the value!
   return (buf[0] == '1');
