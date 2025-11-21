@@ -61,9 +61,9 @@
 },
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/dist/test",
-  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/unity/src -I/home/vizn3r/dev/kraken/rc-boat/lib/gps -I/home/vizn3r/dev/kraken/rc-boat/lib/uart -I/home/vizn3r/dev/kraken/rc-boat/lib/imu -I/home/vizn3r/dev/kraken/rc-boat/lib/lora -I/home/vizn3r/dev/kraken/rc-boat/lib/spi -I/home/vizn3r/dev/kraken/rc-boat/lib/i2c -I/home/vizn3r/dev/kraken/rc-boat/lib/gpio  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/test_imu.dir/test/test_imu.c.o -c /home/vizn3r/dev/kraken/rc-boat/test/test_imu.c",
-  "file": "/home/vizn3r/dev/kraken/rc-boat/test/test_imu.c",
-  "output": "CMakeFiles/test_imu.dir/test/test_imu.c.o"
+  "command": "/usr/bin/cc  -I/home/vizn3r/dev/kraken/rc-boat/lib/unity/src -I/home/vizn3r/dev/kraken/rc-boat/lib/gps -I/home/vizn3r/dev/kraken/rc-boat/lib/uart -I/home/vizn3r/dev/kraken/rc-boat/lib/imu -I/home/vizn3r/dev/kraken/rc-boat/lib/lora -I/home/vizn3r/dev/kraken/rc-boat/lib/spi -I/home/vizn3r/dev/kraken/rc-boat/lib/i2c -I/home/vizn3r/dev/kraken/rc-boat/lib/gpio  -Wall -Wextra -O2 -DNDEBUG -g -g -DDEBUG -std=gnu17 -o CMakeFiles/test_hardware_imu.dir/test/test_hardware_imu.c.o -c /home/vizn3r/dev/kraken/rc-boat/test/test_hardware_imu.c",
+  "file": "/home/vizn3r/dev/kraken/rc-boat/test/test_hardware_imu.c",
+  "output": "CMakeFiles/test_hardware_imu.dir/test/test_hardware_imu.c.o"
 },
 {
   "directory": "/home/vizn3r/dev/kraken/rc-boat/dist/test",

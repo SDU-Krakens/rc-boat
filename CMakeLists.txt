@@ -21,10 +21,6 @@ add_executable(rc-boat main.c)
 
 ### Libraries
 
-# Unity
-add_library(unity lib/unity/src/unity.c)
-target_include_directories(unity PUBLIC lib/unity/src)
-
 # GPS + UART
 add_library(gps lib/gps/gps.c)
 target_include_directories(gps PUBLIC lib/gps)
@@ -48,6 +44,10 @@ target_include_directories(spi PUBLIC lib/spi)
 # GPIO
 add_library(gpio lib/gpio/gpio.c)
 target_include_directories(gpio PUBLIC lib/gpio)
+
+# Unity
+add_library(unity lib/unity/src/unity.c)
+target_include_directories(unity PUBLIC lib/unity/src)
 
 target_link_libraries(rc-boat gps uart mpu lora spi gpio i2c nmea)
 
