@@ -3,4 +3,4 @@
 git pull origin $(git rev-parse --abbrev-ref HEAD)
 
 ./build.sh
-./build/rc-boat
+./dist/build/rc-boat
