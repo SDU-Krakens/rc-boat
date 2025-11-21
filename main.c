@@ -56,7 +56,7 @@ int main(void) {
   }
 
   // Initialize IMU
-  imuConfig();
+  imu_config();
 
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
@@ -73,8 +73,8 @@ int main(void) {
     lon = gps->loc.lon;
 
     // Read IMU data
-    getRawAcc(&accel_x, &accel_y, &accel_z);
-    getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
+    get_raw_acc(&accel_x, &accel_y, &accel_z);
+    get_raw_gyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
     accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
     tilt = gyro_pitch;

@@ -34,9 +34,9 @@ add_library(uart lib/uart/uart.c)
 target_include_directories(uart PUBLIC lib/uart)
 
 # IMU + I2C
-add_library(mpu6050 lib/imu/mpu6050.c)
-target_include_directories(mpu6050 PUBLIC lib/imu)
-add_library(mpu6050 lib/i2c/i2c.c)
+add_library(mpu lib/imu/mpu6050.c)
+target_include_directories(mpu PUBLIC lib/imu)
+add_library(i2c lib/i2c/i2c.c)
 target_include_directories(i2c PUBLIC lib/i2c)
 
 # LoRa + SPI
@@ -49,7 +49,7 @@ target_include_directories(spi PUBLIC lib/spi)
 add_library(gpio lib/gpio/gpio.c)
 target_include_directories(gpio PUBLIC lib/gpio)
 
-target_link_libraries(rc-boat gps uart mpu6050 lora spi gpio i2c nmea)
+target_link_libraries(rc-boat gps uart mpu lora spi gpio i2c nmea)
 
 find_library(RT_LIBRARY rt)
 find_library(M_LIBRARY m)
@@ -69,14 +69,12 @@ endif()
 
 
 if(BUILD_TESTS)
-  # Tests
   enable_testing()
-
   file(GLOB TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test/test_*.c")
   foreach(test_file ${TEST_FILES})
     get_filename_component(test_name ${test_file} NAME_WE)
     add_executable(${test_name} ${test_file})
-    target_link_libraries(${test_name} unity nmea gps uart mpu6050 lora spi gpio m rt)
+    target_link_libraries(${test_name} unity nmea gps uart mpu lora spi i2c gpio m rt)
     add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)
   endforeach()
 endif()

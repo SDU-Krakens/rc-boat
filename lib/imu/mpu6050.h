@@ -7,28 +7,26 @@
 #pragma once
 
 // includes vv
-#include <stdio.h>
-#include <stdlib.h>
 // #include <sys/types.h>
-#include "../i2c/i2c.h"
 #include <stdint.h>
 #include <sys/types.h>
+
 // defines vv
 #define adr_mpu 0x68 // specified by the breakout board
 #define adr_slv0                                                               \
-	0xff // adress of the first sub slave (to be determined) // LSB 0 bu
-	     // default
+  0xff // adress of the first sub slave (to be determined) // LSB 0 bu
+       // default
 #define gyro_range                                                             \
-	0 // select which gyroscope range to use (see the table below) - default
-	  // is 0
+  0 // select which gyroscope range to use (see the table below) - default
+    // is 0
 //	gyroscope range
 //	0	+/- 250 degrees/second
 //	1	+/- 500 degrees/second
 //	2	+/- 1000 degrees/second
 //	3	+/- 2000 degrees/second
 #define accel_range                                                            \
-	0 // select which accelerometer range to use (see the table below) -
-	  // default is 0
+  0 // select which accelerometer range to use (see the table below) -
+    // default is 0
 //	accelerometer range
 //	0	+/- 2g
 //	1	+/- 4g
@@ -52,22 +50,24 @@ void write_to_slave(u_int8_t adr_slave, u_int8_t adr_register, u_int8_t data);
 //  * 1000
 //  * 2000
 //  */
-u_int8_t gyro_scale = 250; // [+- deg/s]
+// extern uint8_t gyro_scale; // [+- deg/s]
+////
+//// /* defines the range of values the accelerometer will suply.
+////  * the allowed values are in +- g (multiplies of ~9.81m/s/s):
+////  * 2
+////  * 4
+////  * 8
+////  * 16
+////  */
+// extern uint8_t accelerometer_scale; // [+- g]
 //
-// /* defines the range of values the accelerometer will suply.
-//  * the allowed values are in +- g (multiplies of ~9.81m/s/s):
-//  * 2
-//  * 4
-//  * 8
-//  * 16
-//  */
-u_int8_t accelerometer_scale = 2; // [+- g]
-
-u_int8_t dlpf = 0; // 3bit // changes depending on the bandwidth and delay of
-		   // gyro and accelerometer (see register map page 13)
-u_int8_t ext_synq = 0;	   // 3bit // no syncing
-u_int8_t sample_rate = 10; // [khz]
-u_int8_t wait_for_es =
-    1; // 1bit // if 1: data ready interrupt waits for the slave data to arrive
-u_int8_t i2c_mst_clk = 0; // 4bit // determins the clock frequency of the i2c
-			  // master (see register map page 18)
+// extern uint8_t dlpf;     // 3bit // changes depending on the bandwidth and
+// delay of
+//                       // gyro and accelerometer (see register map page 13)
+// extern uint8_t ext_synq; // 3bit // no syncing
+// extern uint8_t sample_rate; // [khz]
+// extern uint8_t wait_for_es;
+//     // 1bit // if 1: data ready interrupt waits for the slave data to arrive
+// extern uint8_t i2c_mst_clk; // 4bit // determins the clock frequency of the
+// i2c
+//  master (see register map page 18)

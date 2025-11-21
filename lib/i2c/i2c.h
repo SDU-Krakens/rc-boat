@@ -8,10 +8,6 @@
  */
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
-
 // functions declarations vv
-
 int i2c_read(char adr_slave, char adr_register);
 int i2c_write(char adr_slave, char adr_register, char data);

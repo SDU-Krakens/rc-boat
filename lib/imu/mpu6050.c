@@ -4,7 +4,22 @@
 // date: 2025-11-21
 // author: PS
 //
+
 #include "mpu6050.h"
+#include "../i2c/i2c.h"
+#include <stdio.h>
+
+// Variable definitions (initialized in source file)
+uint8_t gyro_scale = 250;        // [+- deg/s]
+uint8_t accelerometer_scale = 2; // [+- g]
+uint8_t dlpf = 0;     // 3bit // changes depending on the bandwidth and delay of
+                      // gyro and accelerometer (see register map page 13)
+uint8_t ext_synq = 0; // 3bit // no syncing
+uint8_t sample_rate = 10; // [khz]
+uint8_t wait_for_es =
+    1; // 1bit // if 1: data ready interrupt waits for the slave data to arrive
+uint8_t i2c_mst_clk = 0; // 4bit // determins the clock frequency of the i2c
+                         // master (see register map page 18)
 
 void imu_config() {
   //    uint8t pwr_mgmt_1 = i2cread(adr, 0x6B); // read the power
@@ -67,9 +82,9 @@ void get_unfil_gyro(
 }
 void get_unfil_acc(
     float *x, float *y,
-    float *z) { // fills the provided float pointers with
-                // unfiltered acceleration in g (multiplications
-                // of earth acceleration) using the accelerometer_range
+    float *z) {   // fills the provided float pointers with
+                  // unfiltered acceleration in g (multiplications
+                  // of earth acceleration) using the accelerometer_range
   int xx, yy, zz; // MIGHT NEED TO BE UNSIGNED
   get_raw_acc(&xx, &yy, &zz);
   *x =
