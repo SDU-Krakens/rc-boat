@@ -1,2 +1,0 @@
-/usr/bin/ar qc libuart.a CMakeFiles/uart.dir/lib/uart/uart.c.o
-/usr/bin/ranlib libuart.a
