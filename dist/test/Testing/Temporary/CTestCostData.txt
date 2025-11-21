@@ -1,3 +1,0 @@
-test_testing 9 0
----
-test_testing
