@@ -1,24 +1,27 @@
 // Wrapper for i2c communication with IMU
 // dependencies:
 //    - needs i2c-tools package (version? 1.69~deb13u1 arm64)
-// date: 2025-11-11
+// date: 2025-11-21
 // author: PS
 //
 #include "mpu6050.h"
+#include <stdio.h>
+#include <sys/types.h>
 
 int main() {
 	int test = i2c_read(adr_mpu, 0x26);
 	imu_config();
+	i2c_write(adr_mpu, 0x26, 0xaa);
+	printf("\n%d", i2c_read(adr_mpu, 0x26));
+	printf("\n\n");
 	printf("test: %d\n", test);
+
 	int x1, y1, z1;
 	get_raw_acc(&x1, &y1, &z1);
 	printf("\nraw acceleration data: %d, %d, %d", x1, y1, z1);
 	float x2, y2, z2;
 	get_unfil_acc(&x2, &y2, &z2);
 	printf("\nunfiltered acceleration data: %f, %f, %f", x2, y2, z2);
-	i2c_write(adr_mpu, 0x26, 0xaa);
-	printf("\n%d", i2c_read(adr_mpu, 0x26));
-	printf("\n\n");
 	return 0;
 }
 
@@ -39,7 +42,15 @@ void imu_config() {
 	i2c_write(adr_mpu, 0x1a, config_val); // external synq and dlpf
 	i2c_write(adr_mpu, 0x1b,
 		  gyro_range << 3); // sets up the range of gyroscope
-	i2c_write(adr_mpu, 0x1c, accel_range << 3);
+	i2c_write(adr_mpu, 0x1c,
+		  accel_range << 3); // sets up accelerometer range
+				     // i2c master configuration vv
+	u_int8_t maseter_conf =
+	    0x00 | (wait_for_es << 6) |
+	    i2c_mst_clk; // configurations for the sub master i2c controll
+	i2c_write(adr_mpu, 0x24, maseter_conf);
+	i2c_write(adr_mpu, 0x25,
+		  (adr_mpu >> 1)); // defines the adress of the first sub slave
 }
 void get_raw_acc(int *xx, int *yy, int *zz) {
 	u_int16_t x = (i2c_read(adr_mpu, 0x3b) << 8); // read high byte
@@ -68,7 +79,7 @@ void get_unfil_gyro(
     float *yaw) {    // fills the provided float pointers with unfiltered
 		     // angular speed in deg/s using the gyro_scale
 	int x, y, z; // MIGHT NEED TO BE UNSIGNED
-	getRawGyro(&x, &y, &z);
+	get_raw_gyro(&x, &y, &z);
 	*roll = (((float)x - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
 	*pitch =
 	    (((float)y - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
@@ -80,13 +91,69 @@ void get_unfil_acc(
 			// unfiltered acceleration in g (multiplications
 			// of earth acceleration) using the accelerometer_range
 	int xx, yy, zz; // MIGHT NEED TO BE UNSIGNED
-	getRawGyro(&xx, &yy, &zz);
+	get_raw_acc(&xx, &yy, &zz);
 	*x = (((float)xx - (UINT16_MAX / 2)) * accelerometer_scale) /
 	     (UINT16_MAX / 2);
 	*y = (((float)yy - (UINT16_MAX / 2)) * accelerometer_scale) /
 	     (UINT16_MAX / 2);
 	*z = (((float)zz - (UINT16_MAX / 2)) * accelerometer_scale) /
 	     (UINT16_MAX / 2);
+}
+void write_to_slave0(u_int8_t adr_register, u_int8_t data) {
+	i2c_write(adr_mpu, 0x26, adr_register); // defines which register on
+						// slave will be written into
+	i2c_write(adr_mpu, 0x25,
+		  ((0 << 7) |
+		   (adr_slv0 >> 1))); // defines the operation as writing and
+				      // the adress as the slave 0 adress
+	u_int8_t length = 0;	      // 4bit // how many bytes will be sent
+	u_int8_t slave_conf = length | (1 << 7);
+	i2c_write(
+	    adr_mpu, 0x63,
+	    data); // determins what dataw ill be written into the sub slave
+	i2c_write(adr_mpu, 0x27,
+		  slave_conf); // enables writing 1 byte to sub slave 0
+	while (i2c_read(adr_mpu, 0x27) &
+	       (1 << 7)) {   // checks if the data send enable bit is still up
+		printf("."); // debuging shit, delete later please!!!!
+	}
+}
+void write_to_slave(u_int8_t adr_slave, u_int8_t adr_register, u_int8_t data) {
+	u_int8_t write_adress, slv_adr_adr, slv_reg_adr, slv_data_adr,
+	    slv_conf_adr;
+	switch (adr_slave) {
+	case adr_slv0:
+		write_adress = (0 << 7) | (adr_slv0 >> 1);
+		slv_adr_adr = 0x25;
+		slv_reg_adr = 0x26;
+		slv_data_adr = 0x63;
+		slv_conf_adr = 0x27;
+		break;
+	default:
+		write_adress = (0 << 7) | (adr_slv0 >> 1);
+		slv_adr_adr = 0x25;
+		slv_reg_adr = 0x26;
+		slv_data_adr = 0x63;
+		slv_conf_adr = 0x27;
+		break;
+	}
+	i2c_write(adr_mpu, slv_reg_adr,
+		  adr_register); // defines which register on
+				 // slave will be written into
+	i2c_write(adr_mpu, slv_adr_adr,
+		  write_adress); // defines the operation as writing and
+				 // the adress as the slave 0 adress
+	u_int8_t length = 0;	 // 4bit // how many bytes will be sent
+	u_int8_t slave_conf = length | (1 << 7);
+	i2c_write(
+	    adr_mpu, slv_data_adr,
+	    data); // determins what dataw ill be written into the sub slave
+	i2c_write(adr_mpu, slv_conf_adr,
+		  slave_conf); // enables writing 1 byte to sub slave 0
+	while (i2c_read(adr_mpu, slv_conf_adr) &
+	       (1 << 7)) {   // checks if the data send enable bit is still up
+		printf("."); // debuging shit, delete later please!!!!
+	}
 }
 
 // void selfTest(){
