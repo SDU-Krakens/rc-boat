@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnmea.a CMakeFiles/nmea.dir/lib/gps/nmea.c.o
+/usr/bin/ranlib libnmea.a

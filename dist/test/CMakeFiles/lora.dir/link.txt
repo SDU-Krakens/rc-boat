@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblora.a CMakeFiles/lora.dir/lib/lora/lora.c.o
+/usr/bin/ranlib liblora.a

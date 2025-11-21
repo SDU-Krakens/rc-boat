@@ -16,6 +16,7 @@ spi_t *spi_init(const char *dev, uint32_t speed_hz, uint8_t mode,
     free(spi);
     return NULL;
   }
+
   spi->speed_hz = speed_hz;
   spi->cs_pin = gpio_open(cs_pin);
   gpio_set_direction(spi->cs_pin, GPIO_OUTPUT);
