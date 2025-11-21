@@ -121,4 +121,3 @@ size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
 	    temp1, temp2, temp3, volt, lat, lon, (int)accel, (int)bat,
 	    (int)watt, tilt, head);
 	return (result >= 0) ? (size_t)result : 0;
-}
