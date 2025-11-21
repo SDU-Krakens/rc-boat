@@ -5,8 +5,6 @@
 // author: PS
 //
 #include "mpu6050.h"
-#include <stdio.h>
-#include <sys/types.h>
 
 int main() {
 	int test = i2c_read(adr_mpu, 0x26);

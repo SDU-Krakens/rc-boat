@@ -71,4 +71,3 @@ u_int8_t wait_for_es =
     1; // 1bit // if 1: data ready interrupt waits for the slave data to arrive
 u_int8_t i2c_mst_clk = 0; // 4bit // determins the clock frequency of the i2c
 			  // master (see register map page 18)
-u_int8_t
