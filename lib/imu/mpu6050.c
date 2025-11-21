@@ -83,13 +83,14 @@ void get_unfil_gyro(
 }
 void get_unfil_acc(
     float *x, float *y,
-    float *z) { // fills the provided float pointers with
-		// unfiltered acceleration in g (multiplications
-		// of earth acceleration) using the accelerometer_range
-	unsigned int xx, yy, zz; // MIGHT NEED TO BE UNSIGNED
+    float *z) {		// fills the provided float pointers with
+			// unfiltered acceleration in g (multiplications
+			// of earth acceleration) using the accelerometer_range
+	int xx, yy, zz; // MIGHT NEED TO BE UNSIGNED
 	get_raw_acc(&xx, &yy, &zz);
-	*x = (((float)xx - (UINT16_MAX / 2)) * accelerometer_scale) /
-	     (UINT16_MAX / 2);
+	// 	*x = (((float)xx - (UINT16_MAX / 2)) * accelerometer_scale) /
+	// 	     (UINT16_MAX / 2);
+	*x = (((float)xx) * accelerometer_scale) / (UINT16_MAX);
 	*y = (((float)yy - (UINT16_MAX / 2)) * accelerometer_scale) /
 	     (UINT16_MAX / 2);
 	*z = (((float)zz - (UINT16_MAX / 2)) * accelerometer_scale) /
