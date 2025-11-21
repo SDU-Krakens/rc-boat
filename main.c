@@ -11,9 +11,9 @@
 #define GPS_BAUDRATE 115200
 #define GPS_TIMEOUT 1000
 
-size_t format_packet(char **message, int temp1, int temp2, int temp3,
+size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
-                     int tilt, int head, int curr);
+                     int tilt, int head);
 
 size_t message_len = 0;
 int temp1 = 0;
@@ -27,6 +27,7 @@ float watt = 0.0;
 int tilt = 0;
 int head = 0;
 int curr = 0;
+int volt = 0;
 
 // IMU stuff
 int accel_x = 0;
@@ -83,8 +84,8 @@ int main(void) {
       message = NULL;
     }
 
-    message_len = format_packet(&message, temp1, temp2, temp3, accel, lat, lon,
-                                bat, watt, tilt, head, curr);
+    message_len = format_packet(&message, temp1, temp2, temp3, volt, accel, lat,
+                                lon, bat, watt, tilt, head);
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, 15000);
@@ -105,13 +106,14 @@ int main(void) {
   return 0;
 }
 
-size_t format_packet(char **message, int temp1, int temp2, int temp3,
+size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
-                     int tilt, int head, int curr) {
+                     int tilt, int head) {
   int result = asprintf(
       message,
-      "t1 %d,t2 %d,t3 %d,acc %f,lat %f,lon %f,bat %f,wat %f,tilt "
-      "%d,head %d,cur %d",
-      temp1, temp2, temp3, accel, lat, lon, bat, watt, tilt, head, curr);
+      "t1 %d,t2 %d,t3 %d, voltage %d, lat %f,lon %f, acceleration %f, "
+      "current %f,water %f,tilt "
+      "%d,heading %d",
+      temp1, temp2, temp3, volt, lat, lon, accel, bat, watt, tilt, head);
   return (result >= 0) ? (size_t)result : 0;
 }
