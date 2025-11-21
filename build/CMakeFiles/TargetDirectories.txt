@@ -1,0 +1,10 @@
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/rc-boat.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/gps.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/uart.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/nmea.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/mpu6050.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/lora.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/spi.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/gpio.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/edit_cache.dir
+/home/vizn3r/dev/kraken/rc-boat/build/CMakeFiles/rebuild_cache.dir
