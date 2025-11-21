@@ -1,6 +1,6 @@
 
 /*
- * date: 2025-09-28
+ * date: 2025-11-21
  * author: ps
  * title: library for the use of the imu mpu-6050 with raspberry pi in c code
  */
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 // #include <sys/types.h>
+#include "../i2c/i2c.h"
 #include <stdint.h>
 // defines vv
 #define adr_mpu 0x68 // specified by the breakout board we
@@ -34,9 +35,12 @@
 // function declatations  vv
 int i2c_read(char adr_slave,
 	     char adr_register); // returns the register value as a decimal
-void getrawacc(int *xx, int *yy, int *zz);
-void imuconfig();
 int i2c_write(char adr_slave, char adr_register, char data);
+void get_raw_acc(int *xx, int *yy, int *zz);
+void get_raw_gyro(int *roll, int *pitch, int *yaw);
+void imu_config();
+void get_unfil_gyro(float *roll, float *pitch, float *yaw);
+void get_unfil_acc(float *x, float *y, float *z);
 
 // global variables vv
 // /* defines the rang of values the gyro will suply.

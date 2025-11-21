@@ -6,70 +6,23 @@
 //
 #include "mpu6050.h"
 
-// int main() {
-// 	int test = i2c_read(adr_mpu, 0x26);
-// 	imuConfig();
-// 	printf("test: %d\n", test);
-// 	float x, y, z;
-// 	getRawAcc(&x, &y, &z);
-// 	printf("\n%f, %f, %f", x, y, z);
-// 	i2c_write(adr_mpu, 0x26, 0xaa);
-// 	printf("\n%d", i2c_read(adr_mpu, 0x26));
-// 	printf("\n\n");
-// 	return 0;
-// }
-
-int i2c_read(char adr_slave, char adr_register) {
-	int result = -1;
-	char *string;
-	if (0 > asprintf(&string, "i2cget -y 1 %d %d", adr_slave, adr_register))
-		return -1; // might need to be < ratehr than >. The same for the
-			   // other i2c wrapper
-	FILE *pipe;
-	char buffer[50];
-	char *buff_ret; // buffer return value
-	pipe = popen(string, "r");
-	free(string);
-	if (pipe == NULL) {
-		puts("Unable to open process");
-		return (-1);
-	}
-	buff_ret = fgets(buffer, sizeof(buffer), pipe);
-	if (buff_ret == NULL) {
-		return -1;
-	} else {
-		sscanf(buffer, "%x", &result);
-	}
-	pclose(pipe);
-	return result;
-}
-int i2c_write(char adr_slave, char adr_register, char data) {
-	char *string;
-	if (0 > asprintf(&string, "i2cset -y 1 %d %d %d", adr_slave,
-			 adr_register, data))
-		return -1;
-	FILE *pipe;
-	pipe = popen(string, "r");
-	free(string);
-	if (pipe == NULL) {
-		puts("Unable to open process");
-		return (-1);
-	}
-	pclose(pipe);
+int main() {
+	int test = i2c_read(adr_mpu, 0x26);
+	imu_config();
+	printf("test: %d\n", test);
+	int x1, y1, z1;
+	get_raw_acc(&x1, &y1, &z1);
+	printf("\nraw acceleration data: %d, %d, %d", x1, y1, z1);
+	float x2, y2, z2;
+	get_unfil_acc(&x2, &y2, &z2);
+	printf("\nunfiltered acceleration data: %f, %f, %f", x2, y2, z2);
+	i2c_write(adr_mpu, 0x26, 0xaa);
+	printf("\n%d", i2c_read(adr_mpu, 0x26));
+	printf("\n\n");
 	return 0;
 }
-void getRawAcc(int *xx, int *yy, int *zz) {
-	u_int16_t x = (i2c_read(adr_mpu, 0x3b) << 8); // read high byte
-	x |= i2c_read(adr_mpu, 0x3C); // read low byte and add to high one
-	u_int16_t y = (i2c_read(adr_mpu, 0x3D) << 8);
-	y |= i2c_read(adr_mpu, 0x3E);
-	u_int16_t z = (i2c_read(adr_mpu, 0x3F) << 8);
-	z |= i2c_read(adr_mpu, 0x40);
-	*xx = (int)x; // change into int and return
-	*yy = (int)y;
-	*zz = (int)z;
-}
-void imuConfig() {
+
+void imu_config() {
 	//    uint8t pwr_mgmt_1 = i2cread(adr, 0x6B); // read the power
 	//    management byte i2cwrite(adr_mpu, 0x6b, (pwr_mgmt_1&(~(1<<6))));
 	//    // write back the byte with sleep disabled
@@ -85,10 +38,21 @@ void imuConfig() {
 	u_int8_t config_val = 0x00 | dlpf | (ext_synq << 3);
 	i2c_write(adr_mpu, 0x1a, config_val); // external synq and dlpf
 	i2c_write(adr_mpu, 0x1b,
-		  GYRO_RANGE << 3); // sets up the range of gyroscope
-	i2c_write(adr_mpu, 0x1c, ACCEL_RANGE << 3);
+		  gyro_range << 3); // sets up the range of gyroscope
+	i2c_write(adr_mpu, 0x1c, accel_range << 3);
 }
-void getRawGyro(int *roll, int *pitch, int *yaw) {
+void get_raw_acc(int *xx, int *yy, int *zz) {
+	u_int16_t x = (i2c_read(adr_mpu, 0x3b) << 8); // read high byte
+	x |= i2c_read(adr_mpu, 0x3C); // read low byte and add to high one
+	u_int16_t y = (i2c_read(adr_mpu, 0x3D) << 8);
+	y |= i2c_read(adr_mpu, 0x3E);
+	u_int16_t z = (i2c_read(adr_mpu, 0x3F) << 8);
+	z |= i2c_read(adr_mpu, 0x40);
+	*xx = (int)x; // change into int and return
+	*yy = (int)y;
+	*zz = (int)z;
+}
+void get_raw_gyro(int *roll, int *pitch, int *yaw) {
 	u_int16_t x = (i2c_read(adr_mpu, 0x43) << 8); // read high byte
 	x |= i2c_read(adr_mpu, 0x44); // read low byte and add to high one
 	u_int16_t y = (i2c_read(adr_mpu, 0x45) << 8);
@@ -108,7 +72,21 @@ void get_unfil_gyro(
 	*roll = (((float)x - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
 	*pitch =
 	    (((float)y - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
-	*roll = (((float)z - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
+	*yaw = (((float)z - (UINT16_MAX / 2)) * gyro_scale) / (UINT16_MAX / 2);
+}
+void get_unfil_acc(
+    float *x, float *y,
+    float *z) {		// fills the provided float pointers with
+			// unfiltered acceleration in g (multiplications
+			// of earth acceleration) using the accelerometer_range
+	int xx, yy, zz; // MIGHT NEED TO BE UNSIGNED
+	getRawGyro(&xx, &yy, &zz);
+	*x = (((float)xx - (UINT16_MAX / 2)) * accelerometer_scale) /
+	     (UINT16_MAX / 2);
+	*y = (((float)yy - (UINT16_MAX / 2)) * accelerometer_scale) /
+	     (UINT16_MAX / 2);
+	*z = (((float)zz - (UINT16_MAX / 2)) * accelerometer_scale) /
+	     (UINT16_MAX / 2);
 }
 
 // void selfTest(){
