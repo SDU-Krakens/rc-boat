@@ -12,7 +12,7 @@ git checkout main
 git pull origin main
 ```
 
-### 2. Create Your Feature Branch
+### 2. Create Your Feature Branch (if it doesn't exist)
 Create a new branch for what you're working on:
 ```bash
 git checkout -b featyour-feature-name
