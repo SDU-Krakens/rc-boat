@@ -1,4 +1,4 @@
-#some changes
+# RC Boat
 
 RC Boat firmware for the RC Boat prototype.
 
