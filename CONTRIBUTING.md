@@ -1,5 +1,7 @@
 # Git Collaboration Guide
 
+(https://github.com/SDU-Krakens/rc-boat/blob/main/CONTRIBUTION.pdf)[PDF version for GitHub Desktop]
+
 ## Overview
 We're all working on the same project, but each person works on their own feature branch. This keeps everyone's work separate until it's ready to merge.
 
