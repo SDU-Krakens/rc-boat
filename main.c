@@ -66,6 +66,7 @@ int main(void) {
   lora_set_tx_power(lora, 17);
   printf("LoRa initialized\n");
 
+  //nigga
   while (1) {
     // Read GPS data
     gps_location(gps);
