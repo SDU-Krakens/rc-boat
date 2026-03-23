@@ -9,9 +9,11 @@
 #define GPS_DEVICE "/dev/serial0"
 #endif
 
+#define GPS_BAUDRATE (uint16_t)115200
+
 gps_t *gps_init(void) {
   gps_t *gps = malloc(sizeof(gps_t));
-  gps->uart = uart_init(GPS_DEVICE, 9600);
+  gps->uart = uart_init(GPS_DEVICE, GPS_BAUDRATE);
 
   return gps;
 }
@@ -68,4 +70,9 @@ void gps_convert_deg_to_dec(double *lat, char ns, double *lon, char we) {
 
   *lat = gps_deg_to_dec(_lat);
   *lon = gps_deg_to_dec(_lon);
+}
+
+void gps_close(gps_t *gps) {
+  uart_close(gps->uart);
+  free(gps);
 }

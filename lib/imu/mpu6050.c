@@ -68,6 +68,7 @@ int i2c_read(char adr_slave, char adr_register) {
   }
   return result;
 }
+
 int i2c_write(char adr_slave, char adr_register, char data) {
   char *string;
   if (0 >
@@ -83,6 +84,7 @@ int i2c_write(char adr_slave, char adr_register, char data) {
   int status = pclose(pipe);
   return (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? 0 : -1;
 }
+
 void getRawAcc(int *xx, int *yy, int *zz) {
   uint16_t x = (i2c_read(0x68, 0x3b) << 8); // read high byte
   x |= i2c_read(0x68, 0x3C);                // read low byte and add to high one
@@ -125,6 +127,7 @@ void getRawGyro(int *roll, int *pitch, int *yaw) {
   *pitch = (int)y;
   *yaw = (int)z;
 }
+
 void get_unfil_gyro(
     float *roll, float *pitch,
     float *yaw) { // fills the provided float pointers with unfiltered

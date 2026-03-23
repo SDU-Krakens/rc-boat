@@ -8,7 +8,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#define GPS_BAUDRATE 115200
 #define GPS_TIMEOUT 1000
 
 size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
@@ -57,7 +56,6 @@ int main(void) {
 
   // Initialize IMU
   imuConfig();
-
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
   lora_set_spreading_factor(lora, 7);
@@ -71,6 +69,7 @@ int main(void) {
     gps_location(gps);
     lat = gps->loc.lat;
     lon = gps->loc.lon;
+    head = (int)gps->loc.course;
 
     // Read IMU data
     getRawAcc(&accel_x, &accel_y, &accel_z);
@@ -96,13 +95,14 @@ int main(void) {
     }
 
     // Add delay to avoid CPU overuse
-    usleep(500000);
+    usleep(GPS_TIMEOUT);
   }
 
   if (message)
     free(message);
-  // TODO: Add GPS cleanup function when implemented
+
   lora_end(lora);
+  gps_close(gps);
   return 0;
 }
 
@@ -111,8 +111,8 @@ size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      int tilt, int head) {
   int result =
       asprintf(message,
-               "t1 %d,t2 %d,t3 %d, voltage %d, lat %f,lon %f, acceleration %d, "
-               "current %d,water %d,tilt "
+               "t1 %d,t2 %d, t3 %d,voltage %d,lat %f,lon %f,acceleration %d,"
+               "current %d,water %d,tilt"
                "%d,heading %d",
                temp1, temp2, temp3, volt, lat, lon, (int)accel, (int)bat,
                (int)watt, tilt, head);

@@ -36,7 +36,7 @@ void uart_close(uart_t *uart) {
   free(uart);
 }
 
-size_t uart_send(uart_t *uart, char *buf, uint16_t len) {
+size_t uart_send(uart_t *uart, char *buf, size_t len) {
   if (uart->fd != -1) {
     char *cpstr = (char *)malloc((len + 1) * sizeof(char));
     strcpy(cpstr, buf);
@@ -51,7 +51,7 @@ size_t uart_send(uart_t *uart, char *buf, uint16_t len) {
   return -1;
 }
 
-size_t uart_read(uart_t *uart, char *buf, uint16_t len) {
+size_t uart_read(uart_t *uart, char *buf, size_t len) {
   char c;
   char *b = buf;
   size_t total_len = 0;
