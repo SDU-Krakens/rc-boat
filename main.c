@@ -66,12 +66,14 @@ int main(void) {
 
   while (1) {
     // Read GPS data
+    pritnf("Reading GPS\n");
     gps_location(gps);
     lat = gps->loc.lat;
     lon = gps->loc.lon;
     head = (int)gps->loc.course;
 
     // Read IMU data
+    printf("Reading IMU\n");
     getRawAcc(&accel_x, &accel_y, &accel_z);
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
