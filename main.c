@@ -78,8 +78,13 @@ int main(void) {
     getRawAcc(&accel_x, &accel_y, &accel_z);
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
-    accel = sqrt(pow(accel_x, 2) + pow(accel_y, 2) + pow(accel_z, 2));
-    tilt = gyro_pitch;
+    // Convert raw to g, then magnitude (at rest ≈ 1g)
+    float scale = ACCEL_SCALE_FACTOR[ACCEL_RANGE] / 32768.0f;
+    float ax = accel_x * scale;
+    float ay = accel_y * scale;
+    float az = accel_z * scale;
+    accel = sqrtf(ax * ax + ay * ay + az * az);
+    tilt = (int)((float)gyro_pitch * GYRO_SCALE_FACTOR[GYRO_RANGE] / 32768.0f);
 
     if (message) {
       free(message); // Free previous allocation
