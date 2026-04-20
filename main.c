@@ -119,10 +119,9 @@ size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      int tilt, int head) {
   int result =
       asprintf(message,
-               "t1 %d,t2 %d, t3 %d,voltage %d,lat %f,lon %f,acceleration %d,"
-               "current %d,water %d,tilt"
-               "%d,heading %d",
-               temp1, temp2, temp3, volt, lat, lon, (int)accel, (int)bat,
+               "t1 %d,t2 %d,t3 %d,voltage %d,lat %f,lon %f,acceleration %.2f,"
+               "current %d,water %d,tilt %d,heading %d",
+               temp1, temp2, temp3, volt, lat, lon, accel, (int)bat,
                (int)watt, tilt, head);
   return (result >= 0) ? (size_t)result : 0;
 }
