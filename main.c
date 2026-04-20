@@ -9,7 +9,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#define GPS_TIMEOUT 1000
+#define LOOP_DELAY_US 100000 // 100ms padding between TX cycles
+#define LORA_TX_TIMEOUT 500  // 500ms max wait for TX done
 
 size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
@@ -95,15 +96,14 @@ int main(void) {
                                 lon, bat, watt, tilt, head);
 
     if (message_len > 0 && message) {
-      bool sent = lora_send(lora, message, message_len, 15000);
+      bool sent = lora_send(lora, message, message_len, LORA_TX_TIMEOUT);
       printf("Sent %db OK?: %s\n", (int)message_len, sent ? "OK" : "FAIL");
       printf("Message: %s\n", message);
     } else {
       printf("Failed to format packet\n");
     }
 
-    // Add delay to avoid CPU overuse
-    usleep(GPS_TIMEOUT);
+    usleep(LOOP_DELAY_US);
   }
 
   if (message)
