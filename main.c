@@ -2,6 +2,7 @@
 #include "lora.h"
 #include "mpu6050.h"
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,13 +30,13 @@ int curr = 0;
 int volt = 0;
 
 // IMU stuff
-int accel_x = 0;
-int accel_y = 0;
-int accel_z = 0;
+int16_t accel_x = 0;
+int16_t accel_y = 0;
+int16_t accel_z = 0;
 
-int gyro_roll = 0;
-int gyro_pitch = 0;
-int gyro_yaw = 0;
+int16_t gyro_roll = 0;
+int16_t gyro_pitch = 0;
+int16_t gyro_yaw = 0;
 
 int main(void) {
   lora_t *lora = lora_init("/dev/spidev0.0", 1000000, 22);
@@ -66,7 +67,7 @@ int main(void) {
 
   while (1) {
     // Read GPS data
-    pritnf("Reading GPS\n");
+    printf("Reading GPS\n");
     gps_location(gps);
     lat = gps->loc.lat;
     lon = gps->loc.lon;

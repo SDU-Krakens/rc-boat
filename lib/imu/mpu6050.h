@@ -5,32 +5,34 @@
  */
 #pragma once
 
-// includes vv
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-// defines vv
-#define adr_mpu 0x68 // specified by the breakout board we
-#define GYRO_RANGE                                                             \
-  0 // Select which gyroscope range to use (see the table below) - Default
-    // is 0
+
+#define MPU6050_ADDR 0x68
+
+#define GYRO_RANGE 0
 //	Gyroscope Range
 //	0	+/- 250 degrees/second
 //	1	+/- 500 degrees/second
 //	2	+/- 1000 degrees/second
 //	3	+/- 2000 degrees/second
-#define ACCEL_RANGE                                                            \
-  0 // Select which accelerometer range to use (see the table below) -
-    // Default is 0
-    //	Accelerometer Range
-    //	0	+/- 2g
-    //	1	+/- 4g
-    //	2	+/- 8g
-    //	3	+/- 16g
-    // See the MPU6000 Register Map for more information
 
-int i2c_read(char adr_slave, char adr_register);
-void getRawAcc(int *xx, int *yy, int *zz);
-void getRawGyro(int *roll, int *pitch, int *yaw);
-void imuConfig();
-int i2c_write(char adr_slave, char adr_register, char data);
-void get_unfil_gyro(float *roll, float *pitch, float *yaw);
+#define ACCEL_RANGE 0
+//	Accelerometer Range
+//	0	+/- 2g
+//	1	+/- 4g
+//	2	+/- 8g
+//	3	+/- 16g
+
+// Sensitivity scale factors (from MPU-6050 datasheet)
+static const float GYRO_SCALE_FACTOR[] = {250.0f, 500.0f, 1000.0f, 2000.0f};
+static const float ACCEL_SCALE_FACTOR[] = {2.0f, 4.0f, 8.0f, 16.0f};
+
+int i2c_read(uint8_t adr_slave, uint8_t adr_register);
+int i2c_write(uint8_t adr_slave, uint8_t adr_register, uint8_t data);
+void imuConfig(void);
+void getRawAcc(int16_t *xx, int16_t *yy, int16_t *zz);
+void getRawGyro(int16_t *roll, int16_t *pitch, int16_t *yaw);
+void getGyro(float *roll, float *pitch, float *yaw);
+void getAccel(float *x, float *y, float *z);

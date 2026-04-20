@@ -10,18 +10,30 @@
 #include <termios.h>
 #include <unistd.h>
 
-uart_t *uart_init(const char *dev, uint16_t baud) {
+uart_t *uart_init(const char *dev, uint32_t baud) {
   uart_t *uart = malloc(sizeof(uart_t));
   uart->fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
-  if (uart->fd == -1) { // Changed != to ==
+  if (uart->fd == -1) {
     free(uart);
     return NULL;
   }
   uart->baud = baud;
-  uart->dev = (char *)dev;
+  uart->dev = strdup(dev);
+
+  speed_t speed;
+  switch (baud) {
+  case 4800:   speed = B4800;   break;
+  case 9600:   speed = B9600;   break;
+  case 19200:  speed = B19200;  break;
+  case 38400:  speed = B38400;  break;
+  case 57600:  speed = B57600;  break;
+  case 115200: speed = B115200; break;
+  default:     speed = B9600;   break;
+  }
 
   struct termios opts;
-  opts.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
+  memset(&opts, 0, sizeof(opts));
+  opts.c_cflag = speed | CS8 | CLOCAL | CREAD;
   opts.c_iflag = IGNPAR;
   opts.c_oflag = 0;
   opts.c_lflag = 0;
@@ -33,6 +45,7 @@ uart_t *uart_init(const char *dev, uint16_t baud) {
 
 void uart_close(uart_t *uart) {
   close(uart->fd);
+  free(uart->dev);
   free(uart);
 }
 
