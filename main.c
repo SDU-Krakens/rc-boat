@@ -11,10 +11,13 @@
 
 #define LOOP_DELAY_US 100000 // 100ms padding between TX cycles
 #define LORA_TX_TIMEOUT 500  // 500ms max wait for TX done
+#define ALPHA 0.98f          // complementary filter coefficient
+#define DEG_TO_RAD (M_PI / 180.0f)
+#define RAD_TO_DEG (180.0f / M_PI)
 
 size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
-                     int tilt, int head);
+                     float roll, float pitch, float yaw, int head);
 
 size_t message_len = 0;
 int temp1 = 0;
@@ -25,7 +28,9 @@ double lat = 0.0;
 double lon = 0.0;
 float bat = 0.0;
 float watt = 0.0;
-int tilt = 0;
+float roll_angle = 0.0f;
+float pitch_angle = 0.0f;
+float yaw_angle = 0.0f;
 int head = 0;
 int curr = 0;
 int volt = 0;
@@ -79,13 +84,29 @@ int main(void) {
     getRawAcc(&accel_x, &accel_y, &accel_z);
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
-    // Convert raw to g, then magnitude (at rest ≈ 1g)
-    float scale = ACCEL_SCALE_FACTOR[ACCEL_RANGE] / 32768.0f;
-    float ax = accel_x * scale;
-    float ay = accel_y * scale;
-    float az = accel_z * scale;
+    // Convert raw to physical units
+    float ascale = ACCEL_SCALE_FACTOR[ACCEL_RANGE] / 32768.0f;
+    float ax = accel_x * ascale;
+    float ay = accel_y * ascale;
+    float az = accel_z * ascale;
     accel = sqrtf(ax * ax + ay * ay + az * az);
-    tilt = (int)((float)gyro_pitch * GYRO_SCALE_FACTOR[GYRO_RANGE] / 32768.0f);
+
+    float gscale = GYRO_SCALE_FACTOR[GYRO_RANGE] / 32768.0f;
+    float gx = gyro_roll * gscale;
+    float gy = gyro_pitch * gscale;
+    float gz = gyro_yaw * gscale;
+
+    // dt in seconds (loop delay + processing)
+    float dt = LOOP_DELAY_US / 1000000.0f;
+
+    // Accel-based angles
+    float accel_roll = atan2f(ay, az) * RAD_TO_DEG;
+    float accel_pitch = atan2f(-ax, sqrtf(ay * ay + az * az)) * RAD_TO_DEG;
+
+    // Complementary filter
+    roll_angle = ALPHA * (roll_angle + gx * dt) + (1.0f - ALPHA) * accel_roll;
+    pitch_angle = ALPHA * (pitch_angle + gy * dt) + (1.0f - ALPHA) * accel_pitch;
+    yaw_angle += gz * dt; // no accel correction for yaw (no magnetometer)
 
     if (message) {
       free(message); // Free previous allocation
@@ -93,7 +114,7 @@ int main(void) {
     }
 
     message_len = format_packet(&message, temp1, temp2, temp3, volt, accel, lat,
-                                lon, bat, watt, tilt, head);
+                                lon, bat, watt, roll_angle, pitch_angle, yaw_angle, head);
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, LORA_TX_TIMEOUT);
@@ -116,12 +137,12 @@ int main(void) {
 
 size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
                      float accel, double lat, double lon, float bat, float watt,
-                     int tilt, int head) {
+                     float roll, float pitch, float yaw, int head) {
   int result =
       asprintf(message,
                "t1 %d,t2 %d,t3 %d,voltage %d,lat %f,lon %f,acceleration %f,"
-               "current %d,water %d,tilt %d,heading %d",
+               "current %d,water %d,roll %f,pitch %f,yaw %f,heading %d",
                temp1, temp2, temp3, volt, lat, lon, accel, (int)bat,
-               (int)watt, tilt, head);
+               (int)watt, roll, pitch, yaw, head);
   return (result >= 0) ? (size_t)result : 0;
 }
