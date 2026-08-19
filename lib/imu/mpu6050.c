@@ -21,7 +21,10 @@ int i2c_read(uint8_t adr_slave, uint8_t adr_register) {
     pclose(pipe);
     return -1;
   }
-  sscanf(buffer, "%x", &result);
+  if (sscanf(buffer, "%i", &result) != 1) {
+    pclose(pipe);
+    return -1;
+  }
   int status = pclose(pipe);
   if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
     return -1;
@@ -43,36 +46,59 @@ int i2c_write(uint8_t adr_slave, uint8_t adr_register, uint8_t data) {
   return (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? 0 : -1;
 }
 
+static int i2c_read_burst(uint8_t adr_slave, uint8_t start_reg, uint8_t *data,
+                          int len) {
+  char *string;
+  if (0 > asprintf(&string, "i2ctransfer -y 1 w1@0x%02x 0x%02x r%d",
+                   adr_slave, start_reg, len))
+    return -1;
+  FILE *pipe = popen(string, "r");
+  free(string);
+  if (pipe == NULL)
+    return -1;
+
+  char buffer[256];
+  if (fgets(buffer, sizeof(buffer), pipe) == NULL) {
+    pclose(pipe);
+    return -1;
+  }
+
+  int status = pclose(pipe);
+  if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+    return -1;
+
+  char *ptr = buffer;
+  for (int i = 0; i < len; i++) {
+    char *endptr;
+    long val = strtol(ptr, &endptr, 0);
+    if (endptr == ptr)
+      return -1;
+    data[i] = (uint8_t)val;
+    ptr = endptr;
+  }
+  return 0;
+}
+
 void getRawAcc(int16_t *xx, int16_t *yy, int16_t *zz) {
-  int hi, lo;
-
-  hi = i2c_read(MPU6050_ADDR, 0x3B);
-  lo = i2c_read(MPU6050_ADDR, 0x3C);
-  *xx = (int16_t)((hi << 8) | lo);
-
-  hi = i2c_read(MPU6050_ADDR, 0x3D);
-  lo = i2c_read(MPU6050_ADDR, 0x3E);
-  *yy = (int16_t)((hi << 8) | lo);
-
-  hi = i2c_read(MPU6050_ADDR, 0x3F);
-  lo = i2c_read(MPU6050_ADDR, 0x40);
-  *zz = (int16_t)((hi << 8) | lo);
+  uint8_t data[6];
+  if (i2c_read_burst(MPU6050_ADDR, 0x3B, data, 6) != 0) {
+    *xx = *yy = *zz = 0;
+    return;
+  }
+  *xx = (int16_t)((data[0] << 8) | data[1]);
+  *yy = (int16_t)((data[2] << 8) | data[3]);
+  *zz = (int16_t)((data[4] << 8) | data[5]);
 }
 
 void getRawGyro(int16_t *roll, int16_t *pitch, int16_t *yaw) {
-  int hi, lo;
-
-  hi = i2c_read(MPU6050_ADDR, 0x43);
-  lo = i2c_read(MPU6050_ADDR, 0x44);
-  *roll = (int16_t)((hi << 8) | lo);
-
-  hi = i2c_read(MPU6050_ADDR, 0x45);
-  lo = i2c_read(MPU6050_ADDR, 0x46);
-  *pitch = (int16_t)((hi << 8) | lo);
-
-  hi = i2c_read(MPU6050_ADDR, 0x47);
-  lo = i2c_read(MPU6050_ADDR, 0x48);
-  *yaw = (int16_t)((hi << 8) | lo);
+  uint8_t data[6];
+  if (i2c_read_burst(MPU6050_ADDR, 0x43, data, 6) != 0) {
+    *roll = *pitch = *yaw = 0;
+    return;
+  }
+  *roll = (int16_t)((data[0] << 8) | data[1]);
+  *pitch = (int16_t)((data[2] << 8) | data[3]);
+  *yaw = (int16_t)((data[4] << 8) | data[5]);
 }
 
 void imuConfig(void) {

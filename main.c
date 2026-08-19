@@ -71,6 +71,9 @@ int main(void) {
   lora_set_tx_power(lora, 17);
   printf("LoRa initialized\n");
 
+  struct timespec prev_time, curr_time;
+  clock_gettime(CLOCK_MONOTONIC, &prev_time);
+
   while (1) {
     // Read GPS data
     printf("Reading GPS\n");
@@ -89,15 +92,20 @@ int main(void) {
     float ax = accel_x * ascale;
     float ay = accel_y * ascale;
     float az = accel_z * ascale;
-    accel = sqrtf(ax * ax + ay * ay + az * az);
+    accel = sqrtf(ax * ax + ay * ay + az * az) - 1.0f; // subtract 1g gravity
 
     float gscale = GYRO_SCALE_FACTOR[GYRO_RANGE] / 32768.0f;
     float gx = gyro_roll * gscale;
     float gy = gyro_pitch * gscale;
     float gz = gyro_yaw * gscale;
 
-    // dt in seconds (loop delay + processing)
-    float dt = LOOP_DELAY_US / 1000000.0f;
+    // Measure actual elapsed time for gyro integration
+    clock_gettime(CLOCK_MONOTONIC, &curr_time);
+    float dt = (float)(curr_time.tv_sec - prev_time.tv_sec) +
+               (float)(curr_time.tv_nsec - prev_time.tv_nsec) / 1e9f;
+    prev_time = curr_time;
+    if (dt <= 0.0f || dt > 2.0f)
+      dt = 0.1f; // clamp to sane range
 
     // Accel-based angles
     float accel_roll = atan2f(ay, az) * RAD_TO_DEG;
