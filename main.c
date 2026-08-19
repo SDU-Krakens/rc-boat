@@ -9,9 +9,11 @@
 #include <time.h>
 #include <unistd.h>
 
-#define LOOP_DELAY_US 100000 // 100ms padding between TX cycles
-#define LORA_TX_TIMEOUT 500  // 500ms max wait for TX done
-#define ALPHA 0.98f          // complementary filter coefficient
+#define IMU_DELAY_US 10000    // 10ms between IMU updates (~100Hz)
+#define LORA_TX_TIMEOUT 500   // 500ms max wait for TX done
+#define GPS_INTERVAL_S 1.0f   // read GPS every 1 second
+#define LORA_INTERVAL_S 1.0f  // send telemetry every 1 second
+#define TAU 0.5f              // complementary filter time constant (seconds)
 #define DEG_TO_RAD (M_PI / 180.0f)
 #define RAD_TO_DEG (180.0f / M_PI)
 
@@ -81,18 +83,27 @@ int main(void) {
   printf("LoRa initialized\n");
 
   struct timespec prev_time, curr_time;
+  struct timespec last_gps_time, last_lora_time;
   clock_gettime(CLOCK_MONOTONIC, &prev_time);
+  last_gps_time = prev_time;
+  last_lora_time = prev_time;
 
   while (1) {
-    // Read GPS data
-    printf("Reading GPS\n");
-    gps_location(gps);
-    lat = gps->loc.lat;
-    lon = gps->loc.lon;
-    head = (int)gps->loc.course;
+    clock_gettime(CLOCK_MONOTONIC, &curr_time);
 
-    // Read IMU data
-    printf("Reading IMU\n");
+    // Read GPS periodically (gps_location blocks until both sentences arrive)
+    float gps_elapsed = (float)(curr_time.tv_sec - last_gps_time.tv_sec) +
+                        (float)(curr_time.tv_nsec - last_gps_time.tv_nsec) / 1e9f;
+    if (gps_elapsed >= GPS_INTERVAL_S) {
+      gps_location(gps);
+      lat = gps->loc.lat;
+      lon = gps->loc.lon;
+      head = (int)gps->loc.course;
+      clock_gettime(CLOCK_MONOTONIC, &curr_time);
+      last_gps_time = curr_time;
+    }
+
+    // Read IMU every iteration
     getRawAcc(&accel_x, &accel_y, &accel_z);
     getRawGyro(&gyro_roll, &gyro_pitch, &gyro_yaw);
 
@@ -101,7 +112,7 @@ int main(void) {
     float ax = accel_x * ascale;
     float ay = accel_y * ascale;
     float az = accel_z * ascale;
-    accel = sqrtf(ax * ax + ay * ay + az * az) - 1.0f; // subtract 1g gravity
+    accel = sqrtf(ax * ax + ay * ay + az * az) - 1.0f;
 
     float gscale = GYRO_SCALE_FACTOR[GYRO_RANGE] / 32768.0f;
     float gx = gyro_roll * gscale;
@@ -114,36 +125,45 @@ int main(void) {
                (float)(curr_time.tv_nsec - prev_time.tv_nsec) / 1e9f;
     prev_time = curr_time;
     if (dt <= 0.0f || dt > 2.0f)
-      dt = 0.1f; // clamp to sane range
+      dt = 0.01f;
 
     // Accel-based angles
     float accel_roll = atan2f(ay, az) * RAD_TO_DEG;
     float accel_pitch = atan2f(-ax, sqrtf(ay * ay + az * az)) * RAD_TO_DEG;
 
-    // Complementary filter
-    roll_angle = ALPHA * (roll_angle + gx * dt) + (1.0f - ALPHA) * accel_roll;
+    // Complementary filter with dynamic alpha based on actual dt
+    float alpha = expf(-dt / TAU);
+    roll_angle = alpha * (roll_angle + gx * dt) + (1.0f - alpha) * accel_roll;
     pitch_angle =
-        ALPHA * (pitch_angle + gy * dt) + (1.0f - ALPHA) * accel_pitch;
-    yaw_angle += gz * dt; // no accel correction for yaw (no magnetometer)
+        alpha * (pitch_angle + gy * dt) + (1.0f - alpha) * accel_pitch;
+    yaw_angle += gz * dt;
 
-    if (message) {
-      free(message); // Free previous allocation
-      message = NULL;
+    // Send telemetry periodically
+    float lora_elapsed =
+        (float)(curr_time.tv_sec - last_lora_time.tv_sec) +
+        (float)(curr_time.tv_nsec - last_lora_time.tv_nsec) / 1e9f;
+    if (lora_elapsed >= LORA_INTERVAL_S) {
+      if (message) {
+        free(message);
+        message = NULL;
+      }
+
+      message_len =
+          format_packet(&message, temp1, temp2, temp3, volt, accel, lat, lon,
+                        bat, watt, roll_angle, pitch_angle, yaw_angle, head);
+
+      if (message_len > 0 && message) {
+        bool sent = lora_send(lora, message, message_len, LORA_TX_TIMEOUT);
+        printf("Sent %db OK?: %s\n", (int)message_len, sent ? "OK" : "FAIL");
+        printf("Message: %s\n", message);
+      } else {
+        printf("Failed to format packet\n");
+      }
+
+      last_lora_time = curr_time;
     }
 
-    message_len =
-        format_packet(&message, temp1, temp2, temp3, volt, accel, lat, lon, bat,
-                      watt, roll_angle, pitch_angle, yaw_angle, head);
-
-    if (message_len > 0 && message) {
-      bool sent = lora_send(lora, message, message_len, LORA_TX_TIMEOUT);
-      printf("Sent %db OK?: %s\n", (int)message_len, sent ? "OK" : "FAIL");
-      printf("Message: %s\n", message);
-    } else {
-      printf("Failed to format packet\n");
-    }
-
-    usleep(LOOP_DELAY_US);
+    usleep(IMU_DELAY_US);
   }
 
   if (message)
