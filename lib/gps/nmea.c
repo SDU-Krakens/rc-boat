@@ -74,16 +74,16 @@ void nmea_parse_gpgga(const char *message, gpgga_t *gpgga) {
     return;
   }
 
-  // Create a working copy since strtok modifies the string
+  // Create a working copy since strsep modifies the string
   char buf[256];
   strncpy(buf, message, sizeof(buf) - 1);
   buf[sizeof(buf) - 1] = '\0';
 
+  char *rest = buf;
   char *token;
   int field = 0;
 
-  token = strtok(buf, ",");
-  while (token != NULL) {
+  while ((token = strsep(&rest, ",")) != NULL) {
     switch (field) {
     case 2: // Latitude
       if (strlen(token) > 0) {
@@ -121,7 +121,6 @@ void nmea_parse_gpgga(const char *message, gpgga_t *gpgga) {
       }
       break;
     }
-    token = strtok(NULL, ",*");
     field++;
   }
 }
@@ -140,11 +139,11 @@ void nmea_parse_gprmc(const char *message, gprmc_t *gprmc) {
   strncpy(buf, message, sizeof(buf) - 1);
   buf[sizeof(buf) - 1] = '\0';
 
+  char *rest = buf;
   char *token;
   int field = 0;
 
-  token = strtok(buf, ",");
-  while (token != NULL) {
+  while ((token = strsep(&rest, ",")) != NULL) {
     switch (field) {
     case 3: // Latitude
       if (strlen(token) > 0) {
@@ -177,7 +176,6 @@ void nmea_parse_gprmc(const char *message, gprmc_t *gprmc) {
       }
       break;
     }
-    token = strtok(NULL, ",*");
     field++;
   }
 }
