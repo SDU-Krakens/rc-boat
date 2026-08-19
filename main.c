@@ -63,6 +63,15 @@ int main(void) {
 
   // Initialize IMU
   imuConfig();
+
+  // Seed complementary filter with accelerometer angles
+  {
+    float ax, ay, az;
+    getAccel(&ax, &ay, &az);
+    roll_angle = atan2f(ay, az) * RAD_TO_DEG;
+    pitch_angle = atan2f(-ax, sqrtf(ay * ay + az * az)) * RAD_TO_DEG;
+  }
+
   lora_set_frequency(lora, 433E6);
   lora_set_bandwith(lora, 125E3);
   lora_set_spreading_factor(lora, 7);
@@ -113,7 +122,8 @@ int main(void) {
 
     // Complementary filter
     roll_angle = ALPHA * (roll_angle + gx * dt) + (1.0f - ALPHA) * accel_roll;
-    pitch_angle = ALPHA * (pitch_angle + gy * dt) + (1.0f - ALPHA) * accel_pitch;
+    pitch_angle =
+        ALPHA * (pitch_angle + gy * dt) + (1.0f - ALPHA) * accel_pitch;
     yaw_angle += gz * dt; // no accel correction for yaw (no magnetometer)
 
     if (message) {
@@ -121,8 +131,9 @@ int main(void) {
       message = NULL;
     }
 
-    message_len = format_packet(&message, temp1, temp2, temp3, volt, accel, lat,
-                                lon, bat, watt, roll_angle, pitch_angle, yaw_angle, head);
+    message_len =
+        format_packet(&message, temp1, temp2, temp3, volt, accel, lat, lon, bat,
+                      watt, roll_angle, pitch_angle, yaw_angle, head);
 
     if (message_len > 0 && message) {
       bool sent = lora_send(lora, message, message_len, LORA_TX_TIMEOUT);
@@ -150,7 +161,7 @@ size_t format_packet(char **message, int temp1, int temp2, int temp3, int volt,
       asprintf(message,
                "t1 %d,t2 %d,t3 %d,voltage %d,lat %f,lon %f,acceleration %f,"
                "current %d,water %d,roll %f,pitch %f,yaw %f,heading %d",
-               temp1, temp2, temp3, volt, lat, lon, accel, (int)bat,
-               (int)watt, roll, pitch, yaw, head);
+               temp1, temp2, temp3, volt, lat, lon, accel, (int)bat, (int)watt,
+               roll, pitch, yaw, head);
   return (result >= 0) ? (size_t)result : 0;
 }
