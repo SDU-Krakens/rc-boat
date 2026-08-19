@@ -21,7 +21,7 @@ typedef struct {
   char lon;
   uint8_t quality;
   uint8_t satellites;
-  double alttitude;
+  double altitude;
 } gpgga_t;
 
 typedef struct {

@@ -117,7 +117,7 @@ void nmea_parse_gpgga(const char *message, gpgga_t *gpgga) {
       break;
     case 9: // Altitude
       if (strlen(token) > 0) {
-        gpgga->alttitude = atof(token);
+        gpgga->altitude = atof(token);
       }
       break;
     }

@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef GPS_DEVICE
 #define GPS_DEVICE "/dev/serial0"
@@ -13,7 +14,15 @@
 
 gps_t *gps_init(void) {
   gps_t *gps = malloc(sizeof(gps_t));
+  if (!gps) {
+    return NULL;
+  }
+
   gps->uart = uart_init(GPS_DEVICE, GPS_BAUDRATE);
+  if (!gps->uart) {
+    free(gps);
+    return NULL;
+  }
 
   return gps;
 }
@@ -25,7 +34,11 @@ void gps_location(gps_t *gps) {
     gprmc_t gprmc;
 
     char buf[256];
-    uart_read(gps->uart, buf, 256);
+    int n = uart_read(gps->uart, buf, sizeof(buf) - 1);
+    if (n <= 0) {
+      continue;
+    }
+    buf[n] = '\0';
 
     switch (nmea_get_message_type(buf)) {
     case NMEA_GPGGA:
@@ -36,7 +49,7 @@ void gps_location(gps_t *gps) {
 
       gps->loc.lat = gpgga.latitude;
       gps->loc.lon = gpgga.longitude;
-      gps->loc.alt = gpgga.alttitude;
+      gps->loc.alt = gpgga.altitude;
 
       status |= NMEA_GPGGA;
       break;
@@ -48,28 +61,28 @@ void gps_location(gps_t *gps) {
 
       status |= NMEA_GPRMC;
       break;
+    default:
+      break;
     }
   }
 }
 
-double gps_deg_to_dec(double deg) {
-  double ddeg, sec = modf(deg, &ddeg) * 60;
-  int _deg = (int)(ddeg / 100);
-  int min = (int)(deg - (_deg * 100));
-
-  double absdlat = round(deg * 1000000.);
-  double absmlat = round(min * 1000000.);
-  double absslat = round(sec * 1000000.);
-
-  return round(absdlat + (absmlat / 60) + (absslat / 3600)) / 1000000;
+double gps_deg_to_dec(double raw) {
+  double degrees = (int)(raw / 100.0);
+  double minutes = raw - degrees * 100.0;
+  return degrees + minutes / 60.0;
 }
 
 void gps_convert_deg_to_dec(double *lat, char ns, double *lon, char we) {
-  double _lat = (ns == 'N') ? *lat : -1 * (*lat);
-  double _lon = (we == 'E') ? *lon : -1 * (*lon);
+  *lat = gps_deg_to_dec(*lat);
+  *lon = gps_deg_to_dec(*lon);
 
-  *lat = gps_deg_to_dec(_lat);
-  *lon = gps_deg_to_dec(_lon);
+  if (ns == 'S') {
+    *lat = -*lat;
+  }
+  if (we == 'W') {
+    *lon = -*lon;
+  }
 }
 
 void gps_close(gps_t *gps) {
