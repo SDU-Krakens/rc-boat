@@ -9,7 +9,7 @@
 #define GPS_DEVICE "/dev/serial0"
 #endif
 
-#define GPS_BAUDRATE (uint16_t)115200
+#define GPS_BAUDRATE (uint16_t)9600
 
 gps_t *gps_init(void) {
   gps_t *gps = malloc(sizeof(gps_t));
