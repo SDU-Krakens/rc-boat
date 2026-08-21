@@ -23,8 +23,8 @@
 #define REG_PAYLOAD_LENGTH 0x22
 #define REG_DIO_MAPPING1 0x40
 #define REG_VERSION 0x42
-#define REG_PREAMBLE_MSB 0x20
-#define REG_PREAMBLE_LSB 0x21
+#define REG_PREAMBLE_MSB 0x43
+#define REG_PREAMBLE_LSB 0x44
 
 // --- Mode bits ---
 #define MODE_LONG_RANGE_MODE 0x80
