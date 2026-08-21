@@ -136,7 +136,7 @@ int main(void) {
     roll_angle = alpha * (roll_angle + gx * dt) + (1.0f - alpha) * accel_roll;
     pitch_angle =
         alpha * (pitch_angle + gy * dt) + (1.0f - alpha) * accel_pitch;
-    yaw_angle += gz * dt;
+    yaw_angle = 0.0f;
 
     // Send telemetry periodically
     float lora_elapsed =
