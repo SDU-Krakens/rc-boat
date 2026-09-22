@@ -42,7 +42,7 @@ lora_t *lora_init(const char *spi_dev, uint32_t spi_speed_hz,
   gpio_set_value(lora->reset, 1);
   usleep(10000);
 
-  lora->spi = spi_init(spi_dev, spi_speed_hz, 0, 27);
+  lora->spi = spi_init(spi_dev, spi_speed_hz, 0, 8);
   if (!lora->spi) {
     free(lora);
     return NULL;

@@ -47,7 +47,7 @@ int16_t gyro_pitch = 0;
 int16_t gyro_yaw = 0;
 
 int main(void) {
-  lora_t *lora = lora_init("/dev/spidev0.0", 1000000, 22);
+  lora_t *lora = lora_init("/dev/spidev0.0", 1000000, 26);
   if (lora == NULL) {
     printf("Failed to init LoRa\n");
     return 1;
