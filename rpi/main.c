@@ -117,7 +117,7 @@ int main(void) {
     float gscale = GYRO_SCALE_FACTOR[GYRO_RANGE] / 32768.0f;
     float gx = gyro_roll * gscale;
     float gy = gyro_pitch * gscale;
-    float gz = gyro_yaw * gscale;
+    //float gz = gyro_yaw * gscale;
 
     // Measure actual elapsed time for gyro integration
     clock_gettime(CLOCK_MONOTONIC, &curr_time);
