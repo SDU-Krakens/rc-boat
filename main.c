@@ -9,6 +9,8 @@
 #include <time.h>
 #include <unistd.h>
 
+// gay sex
+
 #define IMU_DELAY_US 10000    // 10ms between IMU updates (~100Hz)
 #define LORA_TX_TIMEOUT 500   // 500ms max wait for TX done
 #define GPS_INTERVAL_S 1.0f   // read GPS every 1 second
