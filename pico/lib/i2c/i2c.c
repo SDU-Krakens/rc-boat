@@ -1,8 +1,8 @@
 #include "i2c.h"
 #include "config.h"
+#include "log.h"
 
 #include "hardware/gpio.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 i2c_t *i2c_open(i2c_inst_t *inst, uint32_t sda, uint32_t scl, uint32_t baud) {
@@ -23,10 +23,9 @@ i2c_t *i2c_open(i2c_inst_t *inst, uint32_t sda, uint32_t scl, uint32_t baud) {
   gpio_pull_up(scl);
 #endif
 
-#ifdef CONF_DEBUG
-  printf("i2c_open: i2c%d sda %lu scl %lu baud %lu\n", i2c_get_index(inst),
-         (unsigned long)sda, (unsigned long)scl, (unsigned long)i2c->baud);
-#endif
+  log_info(LOG_SRC_I2C, "i2c%u open, sda %lu scl %lu baud %lu",
+           i2c_get_index(inst), (unsigned long)sda, (unsigned long)scl,
+           (unsigned long)i2c->baud);
 
   return i2c;
 }
@@ -46,9 +45,7 @@ int i2c_write(i2c_t *i2c, uint8_t addr, uint8_t reg, uint8_t val) {
   int n = i2c_write_timeout_us(i2c->inst, addr, buf, sizeof(buf), false,
                                I2C_TIMEOUT_US);
   if (n != (int)sizeof(buf)) {
-#ifdef CONF_DEBUG
-    printf("i2c_write: addr %02x reg %02x failed (%d)\n", addr, reg, n);
-#endif
+    log_warn(LOG_SRC_I2C, "write addr %02x reg %02x failed (%d)", addr, reg, n);
     return -1;
   }
   return 0;
@@ -57,18 +54,15 @@ int i2c_write(i2c_t *i2c, uint8_t addr, uint8_t reg, uint8_t val) {
 int i2c_read(i2c_t *i2c, uint8_t addr, uint8_t reg, uint8_t *buf, size_t len) {
   int n = i2c_write_timeout_us(i2c->inst, addr, &reg, 1, true, I2C_TIMEOUT_US);
   if (n != 1) {
-#ifdef CONF_DEBUG
-    printf("i2c_read: addr %02x reg %02x select failed (%d)\n", addr, reg, n);
-#endif
+    log_warn(LOG_SRC_I2C, "read addr %02x reg %02x select failed (%d)", addr,
+             reg, n);
     return -1;
   }
 
   n = i2c_read_timeout_us(i2c->inst, addr, buf, len, false,
                           I2C_TIMEOUT_US * len);
   if (n != (int)len) {
-#ifdef CONF_DEBUG
-    printf("i2c_read: addr %02x reg %02x read failed (%d)\n", addr, reg, n);
-#endif
+    log_warn(LOG_SRC_I2C, "read addr %02x reg %02x failed (%d)", addr, reg, n);
     return -1;
   }
   return 0;

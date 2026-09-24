@@ -1,9 +1,9 @@
 #include "gps.h"
 #include "config.h"
+#include "log.h"
 
 #include "hardware/uart.h"
 #include "pico/time.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 #define MS_PER_S 1000
@@ -63,6 +63,15 @@ static void send_cfg_prt(gps_t *gps) {
   send(gps, UBX_CLASS_CFG, UBX_CFG_PRT, p, sizeof(p));
 }
 
+static int send_rate(gps_t *gps, uint32_t hz) {
+  uint8_t rate[GPS_CFG_RATE_LEN];
+  put_u16(&rate[0], MS_PER_S / hz);
+  put_u16(&rate[2], GPS_NAV_RATE);
+  put_u16(&rate[4], GPS_TIME_REF_GPS);
+  send(gps, UBX_CLASS_CFG, UBX_CFG_RATE, rate, sizeof(rate));
+  return wait_ack(gps, UBX_CLASS_CFG, UBX_CFG_RATE);
+}
+
 static int configure(gps_t *gps) {
   // Module may still be at its default baud: switch it to CONF_GPS_BAUD
   uart_set_baud(gps->uart, GPS_DEFAULT_BAUD);
@@ -78,12 +87,7 @@ static int configure(gps_t *gps) {
     return -1;
   }
 
-  uint8_t rate[GPS_CFG_RATE_LEN];
-  put_u16(&rate[0], MS_PER_S / CONF_GPS_RATE_HZ);
-  put_u16(&rate[2], GPS_NAV_RATE);
-  put_u16(&rate[4], GPS_TIME_REF_GPS);
-  send(gps, UBX_CLASS_CFG, UBX_CFG_RATE, rate, sizeof(rate));
-  if (wait_ack(gps, UBX_CLASS_CFG, UBX_CFG_RATE) != 0) {
+  if (send_rate(gps, CONF_GPS_RATE_HZ) != 0) {
     return -1;
   }
 
@@ -102,21 +106,27 @@ gps_t *gps_open(uart_t *uart) {
 
   for (int i = 0; i < CONF_GPS_CFG_RETRIES; i++) {
     if (configure(gps) == 0) {
-#ifdef CONF_DEBUG
-      printf("gps_open: configured after %d attempt(s)\n", i + 1);
-#endif
+      log_info(LOG_SRC_GPS, "configured after %d attempt(s)", i + 1);
       return gps;
     }
   }
 
-#ifdef CONF_DEBUG
-  printf("gps_open: no ACK from module\n");
-#endif
+  log_err(LOG_SRC_GPS, "no ACK from module after %d attempts",
+          CONF_GPS_CFG_RETRIES);
   free(gps);
   return NULL;
 }
 
 void gps_close(gps_t *gps) { free(gps); }
+
+int gps_set_rate(gps_t *gps, uint32_t hz) {
+  if (hz == 0 || send_rate(gps, hz) != 0) {
+    log_err(LOG_SRC_GPS, "can't set rate %lu Hz", (unsigned long)hz);
+    return -1;
+  }
+  log_info(LOG_SRC_GPS, "rate %lu Hz", (unsigned long)hz);
+  return 0;
+}
 
 static void decode_pvt(gps_fix_t *fix, const uint8_t *p) {
   fix->year = get_u16(&p[GPS_PVT_YEAR]);

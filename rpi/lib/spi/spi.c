@@ -1,9 +1,8 @@
 #include "spi.h"
-#include "config.h"
+#include "log.h"
 
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -17,9 +16,7 @@ spi_t *spi_open(const char *dev, uint32_t speed_hz, uint8_t mode) {
 
   spi->fd = open(dev, O_RDWR | O_CLOEXEC);
   if (spi->fd < 0) {
-#ifdef CONF_DEBUG
-    printf("spi_open: can't open %s\n", dev);
-#endif
+    log_err(LOG_SRC_SPI, "can't open %s", dev);
     free(spi);
     return NULL;
   }
@@ -31,9 +28,7 @@ spi_t *spi_open(const char *dev, uint32_t speed_hz, uint8_t mode) {
   if (ioctl(spi->fd, SPI_IOC_WR_MODE, &mode) < 0 ||
       ioctl(spi->fd, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0 ||
       ioctl(spi->fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed_hz) < 0) {
-#ifdef CONF_DEBUG
-    printf("spi_open: can't configure %s\n", dev);
-#endif
+    log_err(LOG_SRC_SPI, "can't configure %s", dev);
     spi_close(spi);
     return NULL;
   }

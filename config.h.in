@@ -1,13 +1,14 @@
 // Generated from config.h.in by CMake, edit the values with `make config`
 #pragma once
 
-#cmakedefine CONF_DEBUG
-
 // Pico <-> Zero link
 #define CONF_LINK_UART @CONF_LINK_UART@
 #define CONF_LINK_TX_PIN @CONF_LINK_TX_PIN@
 #define CONF_LINK_RX_PIN @CONF_LINK_RX_PIN@
 #define CONF_LINK_BAUD @CONF_LINK_BAUD@
+#define CONF_LINK_DEV "@CONF_LINK_DEV@"
+#define CONF_COMM_RESEND_MS @CONF_COMM_RESEND_MS@
+#define CONF_PICO_LOG_QUEUE @CONF_PICO_LOG_QUEUE@
 
 // IMUs
 #define CONF_IMU0_I2C @CONF_IMU0_I2C@
@@ -57,12 +58,19 @@
 #cmakedefine01 CONF_LORA_CRC
 #define CONF_LORA_LDRO LORA_LDRO_@CONF_LORA_LDRO@ // needs lora.h
 #define CONF_LORA_TX_TIMEOUT_MS @CONF_LORA_TX_TIMEOUT_MS@
+#define CONF_LORA_TELEMETRY_BURST @CONF_LORA_TELEMETRY_BURST@
+#define CONF_LORA_LOG_WINDOW_MS @CONF_LORA_LOG_WINDOW_MS@
+
+// Zero: command socket
+#define CONF_CMD_SOCKET "@CONF_CMD_SOCKET@"
+#define CONF_CMD_REPLY_TIMEOUT_MS @CONF_CMD_REPLY_TIMEOUT_MS@
 
 // Zero: logging
 #define CONF_LOG_DIR "@CONF_LOG_DIR@"
 #define CONF_LOG_LORA_QUEUE @CONF_LOG_LORA_QUEUE@
 #define CONF_LOG_LINE_MAX @CONF_LOG_LINE_MAX@
 #define CONF_LOG_PATH_MAX @CONF_LOG_PATH_MAX@
+#define CONF_LOG_FLUSH_MS @CONF_LOG_FLUSH_MS@
 
 // Zero: SWD flashing of the Pico
 #define CONF_SWD_SWDIO_PIN @CONF_SWD_SWDIO_PIN@

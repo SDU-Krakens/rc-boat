@@ -1,9 +1,9 @@
 #include "bno055.h"
 #include "config.h"
+#include "log.h"
 
 #include "pico/time.h"
 #include <stdbool.h>
-#include <stdio.h>
 
 static int set_mode(bno055_t *bno, uint8_t mode) {
   if (i2c_write(bno->i2c, bno->addr, BNO055_OPR_MODE, mode) != 0) {
@@ -26,9 +26,7 @@ int bno055_open(bno055_t *bno, i2c_t *i2c, const imu_rot_t *rot) {
   bno->rot = rot ? *rot : IMU_ROT_IDENTITY;
 
   if (!probe(bno, BNO055_ADDR_LOW) && !probe(bno, BNO055_ADDR_HIGH)) {
-#ifdef CONF_DEBUG
-    printf("bno055_open: not found\n");
-#endif
+    log_err(LOG_SRC_IMU, "bno055: not found");
     return -1;
   }
 
@@ -48,9 +46,7 @@ int bno055_open(bno055_t *bno, i2c_t *i2c, const imu_rot_t *rot) {
     return -1;
   }
 
-#ifdef CONF_DEBUG
-  printf("bno055_open: addr %02x\n", bno->addr);
-#endif
+  log_info(LOG_SRC_IMU, "bno055: open, addr %02x", bno->addr);
   return 0;
 }
 

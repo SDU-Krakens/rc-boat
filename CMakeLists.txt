@@ -14,13 +14,14 @@ function(conf NAME TYPE DEFAULT HELP)
   set(${NAME} "${DEFAULT}" CACHE ${TYPE} "${HELP}")
 endfunction()
 
-option(CONF_DEBUG "Debug prints in drivers (Pico prints share UART0 with the link)" OFF)
-
 # Pico <-> Zero link
 conf(CONF_LINK_UART STRING 0 "Pico UART instance for the Zero link")
 conf(CONF_LINK_TX_PIN STRING 0 "Pico link TX GPIO")
 conf(CONF_LINK_RX_PIN STRING 1 "Pico link RX GPIO")
 conf(CONF_LINK_BAUD STRING 921600 "Pico <-> Zero link baud rate")
+conf(CONF_LINK_DEV STRING /dev/serial0 "Zero serial device for the link")
+conf(CONF_COMM_RESEND_MS STRING 100 "Resend an unconfirmed text after this many ms")
+conf(CONF_PICO_LOG_QUEUE STRING 65536 "Pico log queue bytes before the main loop pauses")
 
 # IMUs
 conf(CONF_IMU0_I2C STRING 0 "I2C instance of IMU0")
@@ -62,21 +63,28 @@ conf(CONF_LORA_SPI_HZ STRING 1000000 "SX1278 SPI clock in Hz")
 conf(CONF_LORA_RESET_PIN STRING 26 "SX1278 RESET GPIO")
 conf(CONF_LORA_DIO0_PIN STRING 22 "SX1278 DIO0 GPIO")
 conf(CONF_LORA_FREQUENCY STRING 433000000 "LoRa frequency in Hz")
-conf(CONF_LORA_BANDWIDTH STRING 125000 "LoRa bandwidth in Hz")
+conf(CONF_LORA_BANDWIDTH STRING 250000 "LoRa bandwidth in Hz")
 conf(CONF_LORA_SF STRING 7 "LoRa spreading factor 6-12")
-conf(CONF_LORA_CR STRING 8 "LoRa coding rate denominator 5-8")
+conf(CONF_LORA_CR STRING 5 "LoRa coding rate denominator 5-8")
 conf(CONF_LORA_TX_POWER STRING 17 "LoRa TX power in dBm")
 conf(CONF_LORA_PREAMBLE STRING 8 "LoRa preamble length")
 option(CONF_LORA_CRC "LoRa payload CRC" ON)
 conf(CONF_LORA_LDRO STRING AUTO "LoRa low data rate optimize: AUTO, OFF or ON")
 set_property(CACHE CONF_LORA_LDRO PROPERTY STRINGS AUTO OFF ON)
 conf(CONF_LORA_TX_TIMEOUT_MS STRING 500 "LoRa TX timeout in ms")
+conf(CONF_LORA_TELEMETRY_BURST STRING 5 "Telemetry packets before a log window")
+conf(CONF_LORA_LOG_WINDOW_MS STRING 500 "Longest time for log lines between telemetry bursts")
+
+# Zero: command socket
+conf(CONF_CMD_SOCKET STRING /tmp/rc-boat.sock "Unix socket for cmd.py")
+conf(CONF_CMD_REPLY_TIMEOUT_MS STRING 2000 "Wait this long for a Pico reply")
 
 # Zero: logging
 conf(CONF_LOG_DIR STRING /var/log/rc-boat "Directory for log files (must exist)")
 conf(CONF_LOG_LORA_QUEUE STRING 64 "Log lines waiting for LoRa")
 conf(CONF_LOG_LINE_MAX STRING 512 "Maximum log line length in bytes")
 conf(CONF_LOG_PATH_MAX STRING 256 "Maximum log file path length")
+conf(CONF_LOG_FLUSH_MS STRING 1000 "Flush the log file at most this often")
 
 # Zero: SWD flashing of the Pico
 conf(CONF_SWD_SWDIO_PIN STRING 24 "Zero GPIO wired to Pico SWDIO")

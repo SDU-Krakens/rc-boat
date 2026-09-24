@@ -1,8 +1,8 @@
 #include "uart.h"
 #include "config.h"
+#include "log.h"
 
 #include "hardware/gpio.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 uart_t *uart_open(uart_inst_t *inst, uint32_t tx, uint32_t rx, uint32_t baud) {
@@ -19,10 +19,9 @@ uart_t *uart_open(uart_inst_t *inst, uint32_t tx, uint32_t rx, uint32_t baud) {
   gpio_set_function(tx, GPIO_FUNC_UART);
   gpio_set_function(rx, GPIO_FUNC_UART);
 
-#ifdef CONF_DEBUG
-  printf("uart_open: uart%d tx %lu rx %lu baud %lu\n", uart_get_index(inst),
-         (unsigned long)tx, (unsigned long)rx, (unsigned long)uart->baud);
-#endif
+  log_info(LOG_SRC_UART, "uart%u open, tx %lu rx %lu baud %lu",
+           uart_get_index(inst), (unsigned long)tx, (unsigned long)rx,
+           (unsigned long)uart->baud);
 
   return uart;
 }

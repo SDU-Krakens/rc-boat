@@ -1,9 +1,9 @@
 #include "can.h"
+#include "log.h"
 
 #include "hardware/clocks.h"
 #include "hardware/irq.h"
 #include "hardware/sync.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -69,10 +69,9 @@ can_t *can_open(uint32_t pio, uint32_t rx, uint32_t tx, uint32_t bitrate) {
 
   can2040_start(&can->cd, clock_get_hz(clk_sys), bitrate, rx, tx);
 
-#ifdef CONF_DEBUG
-  printf("can_open: pio %lu rx %lu tx %lu bitrate %lu\n", (unsigned long)pio,
-         (unsigned long)rx, (unsigned long)tx, (unsigned long)bitrate);
-#endif
+  log_info(LOG_SRC_CAN, "open, pio %lu rx %lu tx %lu bitrate %lu",
+           (unsigned long)pio, (unsigned long)rx, (unsigned long)tx,
+           (unsigned long)bitrate);
   return can;
 }
 

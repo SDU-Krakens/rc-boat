@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#define US_PER_S 1000000u
+
 #define QUAT_W 0
 #define QUAT_X 1
 #define QUAT_Y 2
@@ -55,7 +57,7 @@ int imu_cal_gyro(imu_t *imu, uint32_t samples) {
   }
   float accel[3], gyro[3], mag[3], temp;
   bool mag_valid;
-  uint32_t period_us = 1000000u / CONF_IMU_SAMPLE_HZ;
+  uint32_t period_us = US_PER_S / imu->icm.sample_hz;
 
   calib_gyro_begin(&imu->icm.cal);
   for (uint32_t i = 0; i < samples; i++) {
@@ -67,6 +69,48 @@ int imu_cal_gyro(imu_t *imu, uint32_t samples) {
   }
   calib_gyro_end(&imu->icm.cal);
   return 0;
+}
+
+int imu_cal_gyro_begin(imu_t *imu, uint32_t samples) {
+  if (imu->type != IMU_ICM20948 || samples == 0) {
+    return -1;
+  }
+  calib_gyro_begin(&imu->icm.cal);
+  imu->icm.gyro_cal_left = samples;
+  return 0;
+}
+
+int imu_cal_gyro_update(imu_t *imu) {
+  if (imu->type != IMU_ICM20948 || imu->icm.gyro_cal_left == 0) {
+    return -1;
+  }
+  float accel[3], gyro[3], mag[3], temp;
+  bool mag_valid;
+  if (icm20948_read_raw(&imu->icm, accel, gyro, mag, &temp, &mag_valid) != 0) {
+    return -1;
+  }
+  calib_gyro_update(&imu->icm.cal, gyro);
+  if (--imu->icm.gyro_cal_left > 0) {
+    return 0;
+  }
+  calib_gyro_end(&imu->icm.cal);
+  return 1;
+}
+
+int imu_set_rate(imu_t *imu, uint32_t hz) {
+  switch (imu->type) {
+  case IMU_ICM20948: return icm20948_set_rate(&imu->icm, hz);
+  case IMU_BNO055: return 0; // fixed internal rate
+  }
+  return -1;
+}
+
+int imu_set_beta(imu_t *imu, float beta) {
+  switch (imu->type) {
+  case IMU_ICM20948: imu->icm.filter.beta = beta; return 0;
+  case IMU_BNO055: return 0; // own fusion
+  }
+  return -1;
 }
 
 int imu_cal_mag_begin(imu_t *imu) {

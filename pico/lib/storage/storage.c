@@ -1,5 +1,6 @@
 #include "storage.h"
 #include "config.h"
+#include "log.h"
 
 #include "hardware/flash.h"
 #include "hardware/regs/addressmap.h"
@@ -108,11 +109,9 @@ storage_t *storage_open(void) {
   }
   st->offset = PICO_FLASH_SIZE_BYTES - CONF_STORAGE_SIZE;
 
-#ifdef CONF_DEBUG
-  printf("storage_open: offset %08lx size %u valid %d\n",
-         (unsigned long)st->offset, (unsigned)CONF_STORAGE_SIZE,
-         header_valid(region(st)));
-#endif
+  log_info(LOG_SRC_STORAGE, "open, offset %08lx size %u valid %d",
+           (unsigned long)st->offset, (unsigned)CONF_STORAGE_SIZE,
+           header_valid(region(st)));
 
   return st;
 }
@@ -165,11 +164,13 @@ int storage_save(storage_t *st, uint16_t tag, const void *data, size_t len) {
   int rc = flash_safe_execute(flash_write_cb, &w, STORAGE_FLASH_TIMEOUT_MS);
   free(img);
 
-#ifdef CONF_DEBUG
-  printf("storage_save: tag %u len %u rc %d\n", tag, (unsigned)len, rc);
-#endif
-
-  return rc == PICO_OK ? 0 : -1;
+  if (rc != PICO_OK) {
+    log_err(LOG_SRC_STORAGE, "save tag %u len %u failed (%d)", tag,
+            (unsigned)len, rc);
+    return -1;
+  }
+  log_info(LOG_SRC_STORAGE, "saved tag %u len %u", tag, (unsigned)len);
+  return 0;
 }
 
 int storage_load(storage_t *st, uint16_t tag, void *data, size_t len) {
@@ -186,9 +187,7 @@ int storage_load(storage_t *st, uint16_t tag, void *data, size_t len) {
   const storage_entry_t *e = (const storage_entry_t *)(base + pos);
   const uint8_t *payload = base + pos + sizeof(storage_entry_t);
   if (e->len != len || crc32(payload, e->len) != e->crc) {
-#ifdef CONF_DEBUG
-    printf("storage_load: tag %u invalid\n", tag);
-#endif
+    log_warn(LOG_SRC_STORAGE, "load tag %u invalid", tag);
     return -1;
   }
 

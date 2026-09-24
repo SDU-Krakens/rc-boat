@@ -101,11 +101,14 @@ typedef struct {
   calib_t cal;
   madgwick_t filter;
   uint64_t last_us;
+  uint32_t sample_hz;     // current sample rate, for the filter timing
+  uint32_t gyro_cal_left; // readings still to collect, 0 = no gyro cal running
 } icm20948_t;
 
 int icm20948_open(icm20948_t *icm, i2c_t *i2c, const imu_rot_t *rot);
 void icm20948_close(icm20948_t *icm);
 int icm20948_read(icm20948_t *icm, imu_sample_t *out);
+int icm20948_set_rate(icm20948_t *icm, uint32_t hz);
 
 // Uncalibrated readings in the chip frame (accel m/s^2, gyro rad/s, mag uT),
 // used for calibration

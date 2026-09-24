@@ -26,18 +26,35 @@ add_library(can2040 ${can2040_SOURCE_DIR}/src/can2040.c)
 target_include_directories(can2040 PUBLIC ${can2040_SOURCE_DIR}/src)
 target_link_libraries(can2040 PUBLIC hardware_pio hardware_dma)
 
+# Shared with the Zero
+set(COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../common)
+
+add_library(types INTERFACE)
+target_include_directories(types INTERFACE ${COMMON_DIR}/types)
+
+add_library(log_src ${COMMON_DIR}/log/log_src.c)
+target_include_directories(log_src PUBLIC ${COMMON_DIR}/log)
+
+add_library(comm ${COMMON_DIR}/comm/comm.c)
+target_include_directories(comm PUBLIC ${COMMON_DIR}/comm)
+target_link_libraries(comm PUBLIC types log_src)
+
 # Libraries
+add_library(log lib/log/log.c)
+target_include_directories(log PUBLIC lib/log ${CONF_CONFIG_DIR})
+target_link_libraries(log PUBLIC pico_stdlib comm log_src)
+
 add_library(i2c lib/i2c/i2c.c)
 target_include_directories(i2c PUBLIC lib/i2c ${CONF_CONFIG_DIR})
-target_link_libraries(i2c PUBLIC pico_stdlib hardware_i2c)
+target_link_libraries(i2c PUBLIC pico_stdlib hardware_i2c log)
 
 add_library(uart lib/uart/uart.c)
 target_include_directories(uart PUBLIC lib/uart ${CONF_CONFIG_DIR})
-target_link_libraries(uart PUBLIC pico_stdlib hardware_uart)
+target_link_libraries(uart PUBLIC pico_stdlib hardware_uart log)
 
 add_library(storage lib/storage/storage.c)
 target_include_directories(storage PUBLIC lib/storage ${CONF_CONFIG_DIR})
-target_link_libraries(storage PUBLIC pico_stdlib hardware_flash pico_flash)
+target_link_libraries(storage PUBLIC pico_stdlib hardware_flash pico_flash log)
 
 add_library(imu
   lib/imu/imu.c
@@ -46,20 +63,20 @@ add_library(imu
   lib/imu/calib.c
   lib/imu/madgwick.c)
 target_include_directories(imu PUBLIC lib/imu ${CONF_CONFIG_DIR})
-target_link_libraries(imu PUBLIC pico_stdlib i2c storage m)
+target_link_libraries(imu PUBLIC pico_stdlib i2c storage types log m)
 
 add_library(gps lib/gps/gps.c lib/gps/ubx.c)
 target_include_directories(gps PUBLIC lib/gps ${CONF_CONFIG_DIR})
-target_link_libraries(gps PUBLIC pico_stdlib uart)
+target_link_libraries(gps PUBLIC pico_stdlib uart types log)
 
 add_library(can lib/can/can.c)
 target_include_directories(can PUBLIC lib/can ${CONF_CONFIG_DIR})
-target_link_libraries(can PUBLIC pico_stdlib hardware_irq hardware_clocks can2040)
+target_link_libraries(can PUBLIC pico_stdlib hardware_irq hardware_clocks can2040 types log)
 
 # Executable
 add_executable(pico main.c)
 target_include_directories(pico PRIVATE ${CONF_CONFIG_DIR})
-target_link_libraries(pico pico_stdlib pico_cyw43_arch_none i2c uart imu gps can storage)
+target_link_libraries(pico pico_stdlib pico_cyw43_arch_none hardware_watchdog i2c uart imu gps can storage comm log)
 
 pico_enable_stdio_usb(pico 0)
 pico_enable_stdio_uart(pico 1)

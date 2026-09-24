@@ -1,9 +1,9 @@
 #include "icm20948.h"
 #include "config.h"
+#include "log.h"
 
 #include "pico/time.h"
 #include <math.h>
-#include <stdio.h>
 
 #define G_TO_MS2 9.80665f
 #define DEG_TO_RAD ((float)M_PI / 180.0f)
@@ -90,21 +90,37 @@ static int setup_sensors(icm20948_t *icm) {
   icm->accel_scale = G_TO_MS2 / accel_sens;
   icm->gyro_scale = DEG_TO_RAD / gyro_sens;
 
-  uint8_t gyro_div =
-      (uint8_t)(ICM20948_GYRO_BASE_HZ / CONF_IMU_SAMPLE_HZ + 0.5f) - 1;
-  uint16_t accel_div =
-      (uint16_t)(ICM20948_ACCEL_BASE_HZ / CONF_IMU_SAMPLE_HZ + 0.5f) - 1;
   uint8_t dlpf = CONF_ICM_DLPF << ICM20948_DLPF_SHIFT;
-
-  if (write_reg(icm, 2, ICM20948_GYRO_SMPLRT_DIV, gyro_div) != 0 ||
-      write_reg(icm, 2, ICM20948_GYRO_CONFIG_1,
+  if (write_reg(icm, 2, ICM20948_GYRO_CONFIG_1,
                 dlpf | (gfs << ICM20948_FS_SHIFT) | ICM20948_FCHOICE) != 0 ||
-      write_reg(icm, 2, ICM20948_ACCEL_SMPLRT_DIV_1, accel_div >> 8) != 0 ||
-      write_reg(icm, 2, ICM20948_ACCEL_SMPLRT_DIV_2, accel_div & 0xFF) != 0 ||
       write_reg(icm, 2, ICM20948_ACCEL_CONFIG,
                 dlpf | (afs << ICM20948_FS_SHIFT) | ICM20948_FCHOICE) != 0) {
     return -1;
   }
+  return 0;
+}
+
+// Sample dividers for the wanted rate; leaves bank 0 selected for reads
+static int write_rate(icm20948_t *icm, uint32_t hz) {
+  uint8_t gyro_div = (uint8_t)(ICM20948_GYRO_BASE_HZ / hz + 0.5f) - 1;
+  uint16_t accel_div = (uint16_t)(ICM20948_ACCEL_BASE_HZ / hz + 0.5f) - 1;
+
+  if (write_reg(icm, 2, ICM20948_GYRO_SMPLRT_DIV, gyro_div) != 0 ||
+      write_reg(icm, 2, ICM20948_ACCEL_SMPLRT_DIV_1, accel_div >> 8) != 0 ||
+      write_reg(icm, 2, ICM20948_ACCEL_SMPLRT_DIV_2, accel_div & 0xFF) != 0 ||
+      select_bank(icm, 0) != 0) {
+    return -1;
+  }
+  icm->sample_hz = hz;
+  return 0;
+}
+
+int icm20948_set_rate(icm20948_t *icm, uint32_t hz) {
+  if (hz == 0 || write_rate(icm, hz) != 0) {
+    log_err(LOG_SRC_IMU, "icm20948: can't set rate %lu Hz", (unsigned long)hz);
+    return -1;
+  }
+  log_info(LOG_SRC_IMU, "icm20948: rate %lu Hz", (unsigned long)hz);
   return 0;
 }
 
@@ -119,9 +135,7 @@ static int setup_mag(icm20948_t *icm) {
   uint8_t wia = 0;
   if (slv4_transfer(icm, true, AK09916_WIA2, &wia) != 0 ||
       wia != AK09916_WIA2_VALUE) {
-#ifdef CONF_DEBUG
-    printf("icm20948: AK09916 not found (%02x)\n", wia);
-#endif
+    log_err(LOG_SRC_IMU, "icm20948: AK09916 not found (%02x)", wia);
     return -1;
   }
 
@@ -156,6 +170,7 @@ int icm20948_open(icm20948_t *icm, i2c_t *i2c, const imu_rot_t *rot) {
   icm->i2c = i2c;
   icm->rot = rot ? *rot : IMU_ROT_IDENTITY;
   icm->last_us = 0;
+  icm->gyro_cal_left = 0;
   calib_open(&icm->cal);
   madgwick_open(&icm->filter, CONF_MADGWICK_BETA);
 
@@ -169,9 +184,7 @@ int icm20948_open(icm20948_t *icm, i2c_t *i2c, const imu_rot_t *rot) {
     icm->addr = 0;
   }
   if (!icm->addr) {
-#ifdef CONF_DEBUG
-    printf("icm20948_open: not found\n");
-#endif
+    log_err(LOG_SRC_IMU, "icm20948: not found");
     return -1;
   }
 
@@ -185,7 +198,8 @@ int icm20948_open(icm20948_t *icm, i2c_t *i2c, const imu_rot_t *rot) {
   }
   sleep_ms(ICM20948_WAKE_MS);
 
-  if (setup_sensors(icm) != 0 || setup_mag(icm) != 0) {
+  if (setup_sensors(icm) != 0 || write_rate(icm, CONF_IMU_SAMPLE_HZ) != 0 ||
+      setup_mag(icm) != 0) {
     return -1;
   }
 
@@ -194,9 +208,7 @@ int icm20948_open(icm20948_t *icm, i2c_t *i2c, const imu_rot_t *rot) {
     return -1;
   }
 
-#ifdef CONF_DEBUG
-  printf("icm20948_open: addr %02x\n", icm->addr);
-#endif
+  log_info(LOG_SRC_IMU, "icm20948: open, addr %02x", icm->addr);
   return 0;
 }
 
@@ -244,7 +256,7 @@ int icm20948_read(icm20948_t *icm, imu_sample_t *out) {
 
   uint64_t now = time_us_64();
   float dt = icm->last_us ? (now - icm->last_us) / 1e6f
-                          : 1.0f / CONF_IMU_SAMPLE_HZ;
+                          : 1.0f / icm->sample_hz;
   icm->last_us = now;
   out->timestamp_us = now;
 

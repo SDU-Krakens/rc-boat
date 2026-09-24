@@ -2,21 +2,13 @@
 
 #include "can2040.h"
 #include "config.h"
+#include "types.h"
 #include <stdbool.h>
 #include <stdint.h>
 
-#define CAN_MAX_DLC 8
 #define CAN_STD_ID_MASK 0x7FFu
 #define CAN_EXT_ID_MASK 0x1FFFFFFFu
 #define CAN_IRQ_PRIORITY 1
-
-typedef struct {
-  uint32_t id;
-  bool ext;
-  bool rtr;
-  uint8_t dlc;
-  uint8_t data[CAN_MAX_DLC];
-} can_frame_t;
 
 typedef struct {
   struct can2040 cd;

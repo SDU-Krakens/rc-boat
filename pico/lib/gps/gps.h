@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../uart/uart.h"
+#include "types.h"
 #include "ubx.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -44,17 +45,6 @@
 #define GPS_BAUD_SWITCH_MS 100
 
 typedef struct {
-  int32_t lat, lon;    // 1e-7 deg
-  int32_t height_mm;   // above ellipsoid
-  int32_t gspeed_mm_s;
-  int32_t heading_1e5; // 1e-5 deg
-  uint8_t fix_type, num_sv;
-  uint16_t year;
-  uint8_t month, day, hour, min, sec;
-  uint8_t valid; // NAV-PVT valid flags
-} gps_fix_t;
-
-typedef struct {
   uart_t *uart;
   ubx_t ubx;
   gps_fix_t fix;
@@ -63,3 +53,4 @@ typedef struct {
 gps_t *gps_open(uart_t *uart);
 void gps_close(gps_t *gps);
 bool gps_poll(gps_t *gps);
+int gps_set_rate(gps_t *gps, uint32_t hz);

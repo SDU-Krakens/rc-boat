@@ -1,10 +1,9 @@
 #include "gpio.h"
-#include "config.h"
+#include "log.h"
 
 #include <fcntl.h>
 #include <linux/gpio.h>
 #include <poll.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -25,9 +24,7 @@ gpio_t *gpio_open(const char *chip, uint32_t pin, bool direction,
 
   gpio->chip_fd = open(chip, O_RDWR | O_CLOEXEC);
   if (gpio->chip_fd < 0) {
-#ifdef CONF_DEBUG
-    printf("gpio_open: can't open %s\n", chip);
-#endif
+    log_err(LOG_SRC_GPIO, "can't open %s", chip);
     free(gpio);
     return NULL;
   }
@@ -56,19 +53,15 @@ gpio_t *gpio_open(const char *chip, uint32_t pin, bool direction,
   }
 
   if (ioctl(gpio->chip_fd, GPIO_V2_GET_LINE_IOCTL, &req) < 0) {
-#ifdef CONF_DEBUG
-    printf("gpio_open: can't request line %u\n", pin);
-#endif
+    log_err(LOG_SRC_GPIO, "can't request line %u", pin);
     close(gpio->chip_fd);
     free(gpio);
     return NULL;
   }
   gpio->line_fd = req.fd;
 
-#ifdef CONF_DEBUG
-  printf("gpio_open: line %u %s\n", pin,
-         direction == GPIO_OUTPUT ? "output" : "input");
-#endif
+  log_info(LOG_SRC_GPIO, "line %u open as %s", pin,
+           direction == GPIO_OUTPUT ? "output" : "input");
   return gpio;
 }
 

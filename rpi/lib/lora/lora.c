@@ -1,7 +1,6 @@
 #include "lora.h"
-#include "config.h"
+#include "log.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -35,18 +34,14 @@ static uint8_t read_reg(lora_t *lora, uint8_t reg) {
   uint8_t tx[2] = {reg & SPI_ADDR_MASK, 0};
   uint8_t rx[2] = {0};
   spi_transfer(lora->spi, tx, rx, sizeof(tx));
-#ifdef CONF_DEBUG
-  printf("lora read: %02x %02x\n", reg, rx[1]);
-#endif
+  log_info(LOG_SRC_LORA, "read reg %02x = %02x", reg, rx[1]);
   return rx[1];
 }
 
 static void write_reg(lora_t *lora, uint8_t reg, uint8_t val) {
   uint8_t tx[2] = {reg | SPI_WRITE_BIT, val};
   spi_transfer(lora->spi, tx, NULL, sizeof(tx));
-#ifdef CONF_DEBUG
-  printf("lora write: %02x %02x\n", reg, val);
-#endif
+  log_info(LOG_SRC_LORA, "write reg %02x = %02x", reg, val);
 }
 
 static void set_mode(lora_t *lora, uint8_t mode) {
@@ -101,9 +96,7 @@ lora_t *lora_open(const char *spi_dev, uint32_t spi_speed_hz,
 
   uint8_t ver = read_reg(lora, REG_VERSION);
   if (ver != LORA_VERSION_SX1278) {
-#ifdef CONF_DEBUG
-    printf("lora_open: wrong version %02x\n", ver);
-#endif
+    log_err(LOG_SRC_LORA, "wrong chip version %02x", ver);
     lora_close(lora);
     return NULL;
   }
