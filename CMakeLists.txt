@@ -72,6 +72,12 @@ conf(CONF_LORA_LDRO STRING AUTO "LoRa low data rate optimize: AUTO, OFF or ON")
 set_property(CACHE CONF_LORA_LDRO PROPERTY STRINGS AUTO OFF ON)
 conf(CONF_LORA_TX_TIMEOUT_MS STRING 500 "LoRa TX timeout in ms")
 
+# Zero: logging
+conf(CONF_LOG_DIR STRING /var/log/rc-boat "Directory for log files (must exist)")
+conf(CONF_LOG_LORA_QUEUE STRING 64 "Log lines waiting for LoRa")
+conf(CONF_LOG_LINE_MAX STRING 512 "Maximum log line length in bytes")
+conf(CONF_LOG_PATH_MAX STRING 256 "Maximum log file path length")
+
 # Zero: SWD flashing of the Pico
 conf(CONF_SWD_SWDIO_PIN STRING 24 "Zero GPIO wired to Pico SWDIO")
 conf(CONF_SWD_SWCLK_PIN STRING 25 "Zero GPIO wired to Pico SWCLK")

@@ -20,7 +20,10 @@ add_library(lora lib/lora/lora.c)
 target_include_directories(lora PUBLIC lib/lora ${CONF_CONFIG_DIR})
 target_link_libraries(lora PUBLIC spi gpio)
 
+add_library(log lib/log/log.c)
+target_include_directories(log PUBLIC lib/log ${CONF_CONFIG_DIR})
+
 # Executable
 add_executable(rc-boat main.c)
 target_include_directories(rc-boat PRIVATE ${CONF_CONFIG_DIR})
-target_link_libraries(rc-boat lora spi gpio m)
+target_link_libraries(rc-boat lora spi gpio log m)
