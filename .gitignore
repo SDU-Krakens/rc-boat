@@ -1,3 +1,5 @@
 dist
 build
 .cache
+pico/compile_commands.json
+rpi/compile_commands.json

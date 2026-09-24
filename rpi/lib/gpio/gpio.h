@@ -3,27 +3,26 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifndef GPIO_OFFSET
-#define GPIO_OFFSET 512
-#endif
-
-#ifndef GPIO_PATH
-#define GPIO_PATH "/sys/class/gpio"
-#endif
-
 #define GPIO_INPUT 0
 #define GPIO_OUTPUT 1
 
+#define GPIO_EDGE_NONE 0
+#define GPIO_EDGE_RISING 1
+#define GPIO_EDGE_FALLING 2
+#define GPIO_EDGE_BOTH 3
+
+#define GPIO_CONSUMER "rc-boat"
+
 typedef struct {
-  bool direction;
-  bool exported;
-  uint32_t value;
+  int chip_fd;
+  int line_fd;
   uint32_t pin;
-  int fd;
+  bool direction;
+  uint32_t value;
 } gpio_t;
 
-gpio_t *gpio_open(uint32_t pin);
+gpio_t *gpio_open(const char *chip, uint32_t pin, bool direction, uint8_t edge);
 void gpio_close(gpio_t *gpio);
-void gpio_set_direction(gpio_t *gpio, bool direction);
-void gpio_set_value(gpio_t *gpio, bool value);
-bool gpio_get_value(gpio_t *gpio);
+int gpio_set_value(gpio_t *gpio, bool value);
+int gpio_get_value(gpio_t *gpio);
+int gpio_wait_edge(gpio_t *gpio, int timeout_ms);
