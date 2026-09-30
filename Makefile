@@ -1,6 +1,6 @@
 BUILD_TYPE ?= Debug
-ZERO_HOST ?=
-ZERO_DIR ?=
+ZERO_HOST ?= root@10.10.4.2
+ZERO_DIR ?= /root/main
 
 BUILD_DIR := dist
 CONFIG_MK := $(BUILD_DIR)/config/config.mk
@@ -9,6 +9,13 @@ RPI_BIN := $(BUILD_DIR)/rpi/rc-boat
 SWD_SPEED_KHZ := 1000
 BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 NPROC := $(shell nproc)
+
+# First ssh asks for the password and becomes the master, later ssh/scp reuse
+# it. Closed at the end of each remote recipe, lingers 10 s idle on failure.
+SSH_OPTS := -o ControlMaster=auto -o ControlPath=$(BUILD_DIR)/.ssh-%C \
+	-o ControlPersist=10
+SSH := ssh $(SSH_OPTS)
+SCP := scp $(SSH_OPTS)
 
 -include $(CONFIG_MK)
 
@@ -52,10 +59,11 @@ flash: check-config
 		-c "program $(PICO_ELF) verify reset exit"
 
 flash-remote: check-remote build
-	ssh $(ZERO_HOST) "mkdir -p $(ZERO_DIR)/$(BUILD_DIR)/pico $(ZERO_DIR)/$(BUILD_DIR)/config"
-	scp $(PICO_ELF) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/pico/
-	scp $(CONFIG_MK) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/config/
-	ssh $(ZERO_HOST) "cd $(ZERO_DIR) && make flash"
+	$(SSH) $(ZERO_HOST) "mkdir -p $(ZERO_DIR)/$(BUILD_DIR)/pico $(ZERO_DIR)/$(BUILD_DIR)/config"
+	$(SCP) $(PICO_ELF) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/pico/
+	$(SCP) $(CONFIG_MK) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/config/
+	$(SSH) $(ZERO_HOST) "cd $(ZERO_DIR) && make flash"
+	$(SSH) -O exit $(ZERO_HOST)
 
 # Run on the Zero
 deploy:
@@ -67,8 +75,9 @@ deploy:
 
 # Run on the laptop
 deploy-remote: check-remote build
-	ssh $(ZERO_HOST) "mkdir -p $(ZERO_DIR)/$(BUILD_DIR)/pico $(ZERO_DIR)/$(BUILD_DIR)/rpi $(ZERO_DIR)/$(BUILD_DIR)/config"
-	scp $(RPI_BIN) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/rpi/
-	scp $(PICO_ELF) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/pico/
-	scp $(CONFIG_MK) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/config/
-	ssh $(ZERO_HOST) "cd $(ZERO_DIR) && make flash && systemctl restart boat"
+	$(SSH) $(ZERO_HOST) "mkdir -p $(ZERO_DIR)/$(BUILD_DIR)/pico $(ZERO_DIR)/$(BUILD_DIR)/rpi $(ZERO_DIR)/$(BUILD_DIR)/config"
+	$(SCP) $(RPI_BIN) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/rpi/
+	$(SCP) $(PICO_ELF) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/pico/
+	$(SCP) $(CONFIG_MK) $(ZERO_HOST):$(ZERO_DIR)/$(BUILD_DIR)/config/
+	$(SSH) $(ZERO_HOST) "cd $(ZERO_DIR) && make flash && systemctl restart boat"
+	$(SSH) -O exit $(ZERO_HOST)
