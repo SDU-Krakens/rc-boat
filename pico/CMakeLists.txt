@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(PICO_BOARD pico_w)
+set(PICO_BOARD pico2_w)
 include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 project(pico C CXX ASM)
