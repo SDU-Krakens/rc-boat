@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 #include <time.h>
 #include <unistd.h>
@@ -498,7 +499,9 @@ static int open_socket(void) {
   }
   struct sockaddr_un addr = {.sun_family = AF_UNIX};
   strncpy(addr.sun_path, CONF_CMD_SOCKET, sizeof(addr.sun_path) - 1);
+  // 0660 so members of the service group (the cmd user) can connect
   if (bind(listen_fd, (struct sockaddr *)&addr, sizeof(addr)) != 0 ||
+      chmod(CONF_CMD_SOCKET, 0660) != 0 ||
       listen(listen_fd, CMD_BACKLOG) != 0) {
     close(listen_fd);
     listen_fd = -1;

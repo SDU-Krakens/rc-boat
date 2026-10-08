@@ -54,6 +54,7 @@ the SWDIO and SWCLK pins of the Pico.
 | `config.h.in`      | Template for the generated `config.h`                 |
 | `config.mk.in`     | Template for the generated `config.mk`                |
 | `cmd.py`           | Command client for the Zero socket                    |
+| `setup/`           | Zero setup script, `boat` service and `cmd` shell     |
 | `schematic.pdf`    | Electrical schematic                                  |
 | `dist/`            | Build output. Git ignores this directory              |
 
@@ -102,8 +103,59 @@ the SWDIO and SWCLK pins of the Pico.
 - The log directory (default `/var/log/rc-boat`). The directory must exist.
   The Zero program does not make it.
 - A systemd service with the name `boat`. The `deploy` and `deploy-remote`
-  targets restart this service. This repository does not contain the
-  service file.
+  targets restart this service. The service file is `setup/boat.service`.
+
+The setup script installs all these items. Refer to section 3.3.
+
+### 3.3 Set up the Zero
+
+`setup/setup.sh` does the full setup of the Zero. Use it on a new
+Raspberry Pi OS (Bookworm or newer). Use it again if the Zero has a
+problem. The script is safe to run again.
+
+1. Connect the Zero to the internet and open a shell on it.
+2. Type this command:
+
+   ```
+   curl -fsSL https://raw.githubusercontent.com/SDU-Krakens/rc-boat/main/setup/setup.sh | sudo bash
+   ```
+
+3. Answer the questions. The script asks for:
+   - The repository directory (default `/home/kraken/rewrite`).
+   - The Wi-Fi SSID and passphrase.
+   - The password for the `cmd` user.
+
+   The script asks for secrets two times. The script itself contains no
+   secrets.
+4. Wait. The script then works without input and restarts the Zero at the
+   end.
+
+The script does these steps:
+
+1. Installs the packages: build tools, `arm-none-eabi` toolchain, CMake,
+   Python 3 and OpenOCD.
+2. Clones the Pico SDK 2.3.1 into `/opt/pico-sdk`. It sets
+   `PICO_SDK_PATH` in `/etc/profile.d/pico-sdk.sh`.
+3. Clones the `main` branch into the repository directory. If the
+   directory exists, it resets the directory to `origin/main`.
+4. Builds with `make build`.
+5. Makes the log directory `/var/log/rc-boat`.
+6. Enables the UART (serial console off) and SPI.
+7. Makes the `rc-boat` group and the `cmd` user. The login shell of `cmd`
+   is `/usr/local/bin/rc-boat-cmd`. It starts `cmd.py`.
+8. Installs and enables `boat.service`. The service runs as root with the
+   group `rc-boat`.
+9. Programs the Pico with `make flash`. If this step fails, the script
+   shows a warning and continues.
+10. Adds the Wi-Fi connection `rc-boat-wifi` with DNS 1.1.1.1.
+11. Restarts the Zero.
+
+> **CAUTION:** The script does `git reset --hard origin/main` in the
+> repository directory. This removes all local changes.
+
+> **NOTE:** The script adds the Wi-Fi connection but does not start it.
+> The Zero connects after the restart. Thus the current SSH connection
+> stays open until the end.
 
 ## 4. Build
 
@@ -242,6 +294,17 @@ ok
 ```
 
 To use a different socket, type `./cmd.py --socket <path>`.
+
+From a different computer, connect with SSH as the `cmd` user. The login
+shell of this user is `cmd.py`, so you get the `rc-boat>` prompt
+immediately. Type `exit` to disconnect.
+
+```
+ssh cmd@<zero address>
+```
+
+The socket has the permissions `0660` and the group `rc-boat`. Only root
+and the members of `rc-boat` can connect.
 
 Only one client can connect at a time. A second client gets the answer
 `error busy`.
