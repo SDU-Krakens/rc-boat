@@ -1,0 +1,3 @@
+# Generated from config.mk.in by CMake, edit the values with `make config`
+CONF_SWD_SWDIO_PIN := @CONF_SWD_SWDIO_PIN@
+CONF_SWD_SWCLK_PIN := @CONF_SWD_SWCLK_PIN@
