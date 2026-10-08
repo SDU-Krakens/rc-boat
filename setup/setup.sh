@@ -17,6 +17,7 @@ CMD_USER=cmd
 CMD_SHELL=/usr/local/bin/rc-boat-cmd
 WIFI_CON=rc-boat-wifi
 DNS=1.1.1.1
+BOAT_HOSTNAME=boat
 
 step() { printf '\n==> %s\n' "$*"; }
 
@@ -51,10 +52,11 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 step "Questions"
-ask REPO_DIR "Repo directory" /home/kraken/main
+ask REPO_DIR "Repo directory" /opt/rc-boat
 ask WIFI_SSID "Wi-Fi SSID"
 ask_secret WIFI_PASS "Wi-Fi passphrase"
 ask_secret CMD_PASS "Password for the $CMD_USER user"
+ask_secret ROOT_PASS "Password for root"
 
 step "Packages"
 apt-get update
@@ -108,6 +110,13 @@ else
 fi
 printf '%s:%s\n' "$CMD_USER" "$CMD_PASS" | chpasswd
 
+step "Root login over SSH"
+printf 'root:%s\n' "$ROOT_PASS" | chpasswd
+echo "PermitRootLogin yes" >/etc/ssh/sshd_config.d/rc-boat.conf
+
+step "Hostname $BOAT_HOSTNAME"
+raspi-config nonint do_hostname "$BOAT_HOSTNAME"
+
 step "boat.service"
 sed "s|@REPO_DIR@|$REPO_DIR|g" "$REPO_DIR/setup/boat.service" \
 	>/etc/systemd/system/boat.service
@@ -131,7 +140,9 @@ nmcli connection add type wifi con-name "$WIFI_CON" ifname wlan0 \
 step "Done"
 echo "repo:    $REPO_DIR ($REPO_BRANCH)"
 echo "service: boat (starts after reboot)"
+echo "host:    $BOAT_HOSTNAME"
 echo "cmd:     ssh $CMD_USER@<zero>"
+echo "root:    ssh root@<zero>"
 echo "wifi:    $WIFI_SSID (connection $WIFI_CON, DNS $DNS)"
 echo "Rebooting for UART/SPI changes..."
 reboot

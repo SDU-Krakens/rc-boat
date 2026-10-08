@@ -1,6 +1,6 @@
 BUILD_TYPE ?= Debug
 ZERO_HOST ?= root@10.10.4.2
-ZERO_DIR ?= /home/kraken/main
+ZERO_DIR ?= /opt/rc-boat
 
 BUILD_DIR := dist
 CONFIG_MK := $(BUILD_DIR)/config/config.mk

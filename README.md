@@ -121,9 +121,10 @@ problem. The script is safe to run again.
    ```
 
 3. Answer the questions. The script asks for:
-   - The repository directory (default `/home/kraken/main`).
+   - The repository directory (default `/opt/rc-boat`).
    - The Wi-Fi SSID and passphrase.
    - The password for the `cmd` user.
+   - The password for `root`.
 
    The script asks for secrets two times. The script itself contains no
    secrets.
@@ -143,12 +144,15 @@ The script does these steps:
 6. Enables the UART (serial console off) and SPI.
 7. Makes the `rc-boat` group and the `cmd` user. The login shell of `cmd`
    is `/usr/local/bin/rc-boat-cmd`. It starts `cmd.py`.
-8. Installs and enables `boat.service`. The service runs as root with the
-   group `rc-boat`.
-9. Programs the Pico with `make flash`. If this step fails, the script
-   shows a warning and continues.
-10. Adds the Wi-Fi connection `rc-boat-wifi` with DNS 1.1.1.1.
-11. Restarts the Zero.
+8. Sets the root password. Permits root login with a password over SSH
+   (`/etc/ssh/sshd_config.d/rc-boat.conf`).
+9. Sets the hostname to `boat`.
+10. Installs and enables `boat.service`. The service runs as root with the
+    group `rc-boat`.
+11. Programs the Pico with `make flash`. If this step fails, the script
+    shows a warning and continues.
+12. Adds the Wi-Fi connection `rc-boat-wifi` with DNS 1.1.1.1.
+13. Restarts the Zero.
 
 > **CAUTION:** The script does `git reset --hard origin/main` in the
 > repository directory. This removes all local changes.
@@ -209,7 +213,7 @@ The remote targets use these variables:
 | Variable    | Default                 | Description                         |
 | ----------- | ----------------------- | ----------------------------------- |
 | `ZERO_HOST` | `root@10.10.4.2`        | SSH user and address of the Zero    |
-| `ZERO_DIR`  | `/home/kraken/main`     | Repository directory on the Zero    |
+| `ZERO_DIR`  | `/opt/rc-boat`          | Repository directory on the Zero    |
 
 Example: `make deploy-remote ZERO_HOST=root@192.168.1.20`
 
