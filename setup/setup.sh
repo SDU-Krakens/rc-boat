@@ -51,7 +51,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 step "Questions"
-ask REPO_DIR "Repo directory" /home/kraken/rewrite
+ask REPO_DIR "Repo directory" /home/kraken/main
 ask WIFI_SSID "Wi-Fi SSID"
 ask_secret WIFI_PASS "Wi-Fi passphrase"
 ask_secret CMD_PASS "Password for the $CMD_USER user"

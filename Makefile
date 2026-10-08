@@ -1,6 +1,6 @@
 BUILD_TYPE ?= Debug
 ZERO_HOST ?= root@10.10.4.2
-ZERO_DIR ?= /home/kraken/rewrite
+ZERO_DIR ?= /home/kraken/main
 
 BUILD_DIR := dist
 CONFIG_MK := $(BUILD_DIR)/config/config.mk

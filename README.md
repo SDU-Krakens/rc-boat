@@ -121,7 +121,7 @@ problem. The script is safe to run again.
    ```
 
 3. Answer the questions. The script asks for:
-   - The repository directory (default `/home/kraken/rewrite`).
+   - The repository directory (default `/home/kraken/main`).
    - The Wi-Fi SSID and passphrase.
    - The password for the `cmd` user.
 
@@ -209,7 +209,7 @@ The remote targets use these variables:
 | Variable    | Default                 | Description                         |
 | ----------- | ----------------------- | ----------------------------------- |
 | `ZERO_HOST` | `root@10.10.4.2`        | SSH user and address of the Zero    |
-| `ZERO_DIR`  | `/home/kraken/rewrite`  | Repository directory on the Zero    |
+| `ZERO_DIR`  | `/home/kraken/main`     | Repository directory on the Zero    |
 
 Example: `make deploy-remote ZERO_HOST=root@192.168.1.20`
 
