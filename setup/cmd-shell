@@ -1,0 +1,3 @@
+#!/bin/bash
+# Login shell of the cmd user
+exec python3 @REPO_DIR@/cmd.py
