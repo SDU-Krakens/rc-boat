@@ -1,87 +1,179 @@
-# Git Collaboration Guide
+# Contribution Guide
 
-[PDF version for GitHub Desktop](https://github.com/SDU-Krakens/rc-boat/blob/main/CONTRIBUTION.pdf)
+This document uses the ASD-STE100 Simplified Technical English rules.
 
-## Overview
-We're all working on the same project, but each person works on their own feature branch. This keeps everyone's work separate until it's ready to merge.
+## 1. Overview
 
-## The Basic Workflow
+All team members work on the same repository. Each person does their work
+on a separate branch. A branch keeps your changes separate from `main`
+until a reviewer approves them.
 
-### 1. Get the Latest Code
-Before starting work, always get the latest version:
+## 2. Rules
+
+1. Do not commit directly to `main`. Use a branch.
+2. Pull `main` before you make a new branch.
+3. Each pull request must contain one feature or one fix only.
+4. Build and test your code before you make a pull request.
+5. Review the pull requests of other team members.
+6. If you do not understand something, ask in the team chat.
+
+## 3. Names
+
+### 3.1 Branch names
+
+Use one of these prefixes:
+
+| Prefix  | Use                | Example           |
+| ------- | ------------------ | ----------------- |
+| `feat/` | A new feature      | `feat/gps`        |
+| `fix/`  | A fix for a defect | `fix/gps-parsing` |
+
+Use short names. Use dashes between words. Do not use spaces.
+
+### 3.2 Commit messages
+
+Use the Conventional Commits format
+(<https://www.conventionalcommits.org/en/v1.0.0/>):
+
+```
+<type>[(scope)][!]: <description>
+
+[body]
+
+[footer]
+```
+
+Use one of these types:
+
+| Type       | Use                                                   |
+| ---------- | ----------------------------------------------------- |
+| `feat`     | A new feature                                         |
+| `fix`      | A fix for a defect                                    |
+| `docs`     | Changes to documentation only                         |
+| `style`    | Changes to formatting only. The code does not change  |
+| `refactor` | Changes to the code that do not add a feature or a fix |
+| `perf`     | Changes that make the code faster                     |
+| `test`     | New tests or changes to tests                         |
+| `build`    | Changes to the build system (`Makefile`, CMake)       |
+| `ci`       | Changes to the CI configuration                       |
+| `chore`    | Other changes that do not change the firmware         |
+| `revert`   | Removal of a previous commit                          |
+
+The scope is optional. It is the part of the code that the commit changes,
+for example `gps`, `lora` or `comm`.
+
+Write the description in the imperative and in lower case. Do not put a
+period at the end.
+
+If the commit changes the behavior in a way that is not compatible with
+the previous version, put `!` before the colon. Also add a
+`BREAKING CHANGE:` footer that gives the change.
+
+| Correct                                  | Incorrect   |
+| ---------------------------------------- | ----------- |
+| `feat(log): add logging for UART`        | `stuff`     |
+| `fix(spi): stop crash at start`          | `changes`   |
+| `docs: describe the LoRa packet format`  | `fast push` |
+| `feat(comm)!: add a CRC to each frame`   | `Fixed GPS.` |
+
+## 4. Procedure
+
+### 4.1 Get the latest code
+
+Before you start work, get the latest version of `main`:
+
 ```bash
 git checkout main
 git pull origin main
 ```
 
-### 2. Create Your Feature Branch (if it doesn't exist)
-Create a new branch for what you're working on:
+### 4.2 Make a branch
+
+To make a new branch, type:
+
 ```bash
-git checkout -b featyour-feature-name
+git checkout -b feat/your-feature-name
 ```
 
-**Branch naming:**
-- Use `feature/` or `feat/` prefix for new features (e.g., `feat/gps`)
-- Use `fix/` prefix for bug fixes (e.g., `fix/gps-parsing`)
-- Keep names short and descriptive
-- Use dashes, not spaces
+If the branch exists, switch to it:
 
-### 3. Work on Your Code
-- Make your changes
-- Test that everything works
-- Commit often with clear messages
-
-**Committing your changes:**
 ```bash
-git add .
-git commit -m "Add login form with validation"
+git checkout feat/your-feature-name
 ```
 
-**Good commit messages:**
-- ✅ "Add logging for UART"
-- ✅ "Fix issue where SPI crashes"
-- ❌ "stuff"
-- ❌ "changes"
+### 4.3 Commit your changes
 
-### 4. Push Your Branch
+1. Make your changes.
+2. Build and test the code.
+3. Look at the changed files:
+
+   ```bash
+   git status
+   ```
+
+4. Add only the files that you want to commit:
+
+   ```bash
+   git add path/to/file.c
+   ```
+
+5. Commit the changes:
+
+   ```bash
+   git commit -m "feat: add logging for UART"
+   ```
+
+Commit frequently. Each commit must contain one change.
+
+### 4.4 Push your branch
+
 Push your branch to GitHub:
+
 ```bash
 git push origin feat/your-feature-name
 ```
 
-If it's your first push on this branch, Git will tell you to set upstream - just copy and run the command it suggests.
+On the first push of a new branch, Git can show a command that sets the
+upstream branch. Type that command.
 
-### 5. Create a Pull Request (PR)
-1. Go to the GitHub repository
-2. Click "Pull requests" → "New pull request"
-3. Select your branch to merge into `main`
-4. Write a clear title and description of what you did
-5. Click "Create pull request"
+### 4.5 Make a pull request
 
-**In your PR description, include:**
-- What feature/fix you added
-- How to test it
-- Any questions or concerns
+1. Open the repository on GitHub.
+2. Click **Pull requests**, then **New pull request**.
+3. Select `main` as the base branch and your branch as the compare branch.
+4. Write a title. Use the same format as a commit message.
+5. Write a description. Include these items:
+   - The feature or the fix that you added.
+   - The procedure to test it.
+   - Your questions or problems, if you have them.
+6. Click **Create pull request**.
 
-### 6. Code Review
-- Wait for at least one team member to review your code
-- Address any feedback or questions
-- Once approved, the PR can be merged
+### 4.6 Code review
 
-### 7. Merge and Clean Up
-After your PR is approved:
-1. Click "Merge pull request" on GitHub
-2. Delete your feature branch (GitHub will offer this option)
-3. Switch back to main locally and pull the changes:
-```bash
-git checkout main
-git pull origin main
-```
+1. Wait for a review from one or more team members.
+2. Read all comments. Change the code or answer each comment.
+3. Push the changes to the same branch. The pull request shows them
+   automatically.
 
-## Common Scenarios
+### 4.7 Merge and clean up
 
-### Someone else merged their code - what do I do?
-Update your feature branch with the latest changes:
+When a reviewer approves the pull request:
+
+1. Click **Merge pull request** on GitHub.
+2. Delete your branch. GitHub shows a button for this.
+3. Switch to `main` and get the merged changes:
+
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+
+## 5. Special conditions
+
+### 5.1 Another person merged changes into `main`
+
+Put the latest changes of `main` into your branch:
+
 ```bash
 git checkout main
 git pull origin main
@@ -89,82 +181,99 @@ git checkout feat/your-feature-name
 git merge main
 ```
 
-If there are conflicts, Git will tell you which files. Open them, fix the conflicts (look for `<<<<<<<` markers), then:
+If Git shows a conflict, do these steps:
+
+1. Open each file that Git shows.
+2. Find the `<<<<<<<`, `=======` and `>>>>>>>` markers.
+3. Keep the correct code and remove the markers.
+4. Add the files and complete the merge:
+
+   ```bash
+   git add path/to/file.c
+   git commit
+   ```
+
+5. Push your branch:
+
+   ```bash
+   git push origin feat/your-feature-name
+   ```
+
+If you cannot solve a conflict, ask a team member for help. Do not use
+`git push --force`.
+
+### 5.2 Your last commit has an error
+
+If you did not push the commit, remove it and keep the changes:
+
 ```bash
-git add .
-git commit -m "Merge main into feature branch"
-git push origin feat/your-feature-name
+git reset --soft HEAD~1
 ```
 
-### I made a mistake in my commit
-If you haven't pushed yet:
-```bash
-git reset --soft HEAD~1  # Undo last commit but keep changes
-```
+Then correct the changes and commit again.
 
-If you already pushed, just make a new commit with the fix.
+If you pushed the commit, do not change it. Make a new commit with the fix.
 
-### I accidentally worked on main instead of a feature branch
-Create the branch now and move your changes:
-```bash
-git checkout -b feat/your-feature-name
-git push origin feat/your-feature-name
-```
+### 5.3 You made changes on `main`
 
-Then reset main:
-```bash
-git checkout main
-git reset --hard origin/main
-```
+1. Make a branch. Your changes move to the new branch:
 
-## Rules to Remember
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
 
-1. **Never commit directly to main** - always use a feature branch
-2. **Always pull before creating a new branch** - start with the latest code
-3. **Keep your PRs focused** - one feature or fix per PR
-4. **Test your code** before creating a PR
-5. **Review others' PRs** - we all learn from each other
-6. **Ask questions** - if you're confused, others probably are too
+2. Commit your changes on the new branch (refer to 4.3).
+3. Push the branch:
 
-## Getting Help
+   ```bash
+   git push origin feat/your-feature-name
+   ```
 
-### Stuck on a Git command?
-Ask in the team chat or check: https://git-scm.com/docs
+4. Reset your local `main` to the GitHub version:
 
-### Merge conflict you can't figure out?
-Don't force anything - ask a teammate to pair with you.
+   ```bash
+   git checkout main
+   git reset --hard origin/main
+   ```
 
-### Broke something?
-Don't panic! Git keeps history of everything. We can always fix it.
+> **CAUTION:** `git reset --hard` removes all changes on `main` that are not
+> on a different branch. Do step 4 only after step 3 is complete.
 
-## Quick Reference
+## 6. Help
+
+- For help with Git commands, ask in the team chat or refer to
+  <https://git-scm.com/docs>.
+- If you cannot solve a merge conflict, ask a team member to work on it
+  with you.
+- If you broke something, stop and ask for help. Git keeps the full
+  history, and the team can repair the problem.
+
+## 7. Quick reference
 
 ```bash
-# Start working on something new
+# Start new work
 git checkout main
 git pull origin main
-git checkout -b feature/your-feature
+git checkout -b feat/your-feature-name
 
 # Save your work
-git add .
-git commit -m "Feat: Your feature description"
-git push origin feat/your-feature
+git status
+git add path/to/file.c
+git commit -m "feat: your change"
+git push origin feat/your-feature-name
 
-# Update your branch with latest main
+# Put the latest main into your branch
 git checkout main
 git pull origin main
-git checkout feat/your-feature
+git checkout feat/your-feature-name
 git merge main
 
-# Switch between branches
+# Switch to a different branch
 git checkout branch-name
 
-# See what branch you're on
+# Show the current branch
 git branch
 
-# See what files changed
+# Show the changed files
 git status
 ```
-
-## Questions?
-If anything is unclear, ask! This is a learning process for all of us.
