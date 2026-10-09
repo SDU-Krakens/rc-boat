@@ -8,7 +8,7 @@ This document uses the ASD-STE100 Simplified Technical English rules.
 
 The system has two computers:
 
-- **Pico**: a Raspberry Pi Pico. It is the sensor hub. The `PICO_BOARD`
+- **Pico**: a Raspberry Pi Pico 2 W. It is the sensor hub. The `PICO_BOARD`
   value in `pico/CMakeLists.txt` sets the board type.
 - **Zero**: a Raspberry Pi Zero 2 W with 64-bit Raspberry Pi OS. It is the
   main computer.

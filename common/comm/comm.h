@@ -32,6 +32,7 @@ typedef enum {
   COMM_TEXT_ACK = 0x84,
 } comm_type_t;
 
+// TODO: merge cmd_t and set_t into cmd_t
 typedef enum {
   COMM_CMD_MAG_CAL_BEGIN = 1,
   COMM_CMD_MAG_CAL_END = 2,

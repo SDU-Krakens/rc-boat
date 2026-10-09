@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 """Send requests to the running Zero program over its Unix socket.
 
-  ./cmd.py cmd gyro cal 500     one request, prints the answer
-  ./cmd.py                      prompt, one request per line
+./cmd.py cmd gyro cal 500     one request, prints the answer
+./cmd.py                      prompt, one request per line
 """
 
 import argparse
@@ -24,8 +23,11 @@ def request(sock, reader, line):
 
 def main():
     parser = argparse.ArgumentParser(description="rc-boat command client")
-    parser.add_argument("--socket", default=DEFAULT_SOCKET,
-                        help="Zero command socket (default %(default)s)")
+    parser.add_argument(
+        "--socket",
+        default=DEFAULT_SOCKET,
+        help="Zero command socket (default %(default)s)",
+    )
     parser.add_argument("words", nargs="*", help="request, e.g. set beta 0.1")
     args = parser.parse_args()
 

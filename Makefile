@@ -59,7 +59,7 @@ flash: check-config
 		-c "adapter gpio swclk $(CONF_SWD_SWCLK_PIN)" \
 		-c "transport select swd" \
 		-c "adapter speed $(SWD_SPEED_KHZ)" \
-		-f target/rp2040.cfg \
+		-f target/rp2350.cfg \
 		-c "program $(PICO_ELF) verify reset exit"
 
 flash-remote: check-remote build

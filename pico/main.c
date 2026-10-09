@@ -158,6 +158,7 @@ static void apply_beta(float beta) {
 // Handlers for messages from the Zero
 
 static comm_result_t do_command(const comm_command_t *c) {
+  // TODO: get rid of this clow ass fuckign switch thing, do discord bot like handling
   switch (c->id) {
   case COMM_CMD_MAG_CAL_BEGIN:
     if (!icm) {

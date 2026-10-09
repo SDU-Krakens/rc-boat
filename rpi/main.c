@@ -40,8 +40,7 @@
 #define IMU_SLOTS 3 // imu0, imu1, combined
 #define TELEMETRY_IMU_LEN 40
 #define TELEMETRY_GPS_LEN 26
-#define TELEMETRY_LEN                                                          \
-  (LORA_HEADER_LEN + IMU_SLOTS * TELEMETRY_IMU_LEN + TELEMETRY_GPS_LEN)
+#define TELEMETRY_LEN (LORA_HEADER_LEN + IMU_SLOTS * TELEMETRY_IMU_LEN + TELEMETRY_GPS_LEN)
 
 // Telemetry scales (value * scale, rounded)
 #define SCALE_ACCEL 100.0f  // 0.01 m/s^2
