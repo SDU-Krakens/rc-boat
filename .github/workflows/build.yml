@@ -1,0 +1,56 @@
+# Build the Pico firmware and the Zero program on every push to main and
+# publish them as a release. The Zero downloads them from
+# https://github.com/SDU-Krakens/rc-boat/releases/latest/download/<file>
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    # Runs as root in the container, so apt needs no sudo
+    container: ubuntu:24.04
+    env:
+      PICO_SDK_TAG: 2.3.1
+      PICO_SDK_PATH: /opt/pico-sdk
+    steps:
+      - name: Packages
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates git make cmake build-essential python3 \
+            gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib \
+            gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+
+      - uses: actions/checkout@v4
+
+      - name: Pico SDK
+        run: |
+          git clone --depth 1 --branch "$PICO_SDK_TAG" --recurse-submodules \
+            --shallow-submodules https://github.com/raspberrypi/pico-sdk.git \
+            "$PICO_SDK_PATH"
+
+      - name: Build
+        run: make build BUILD_TYPE=Release
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: build ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          body: Built from ${{ github.sha }}
+          files: |
+            dist/rpi/rc-boat
+            dist/pico/pico.elf
+            dist/config/config.mk

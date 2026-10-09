@@ -90,6 +90,22 @@ conf(CONF_LOG_FLUSH_MS STRING 1000 "Flush the log file at most this often")
 conf(CONF_SWD_SWDIO_PIN STRING 24 "Zero GPIO wired to Pico SWDIO")
 conf(CONF_SWD_SWCLK_PIN STRING 25 "Zero GPIO wired to Pico SWCLK")
 
+# Write all CONF_* values to the tracked config.txt, so changes made with
+# `make config` go into git and reach the CI build. The Makefile passes
+# config.txt back as -D options. Stale entries (no conf() any more) stay
+# UNINITIALIZED and are dropped.
+get_cmake_property(_vars CACHE_VARIABLES)
+list(SORT _vars)
+set(_conf_txt "# All CONF_* values. Written by CMake, change them with `make config`.\n")
+foreach(_var IN LISTS _vars)
+  get_property(_type CACHE ${_var} PROPERTY TYPE)
+  if(_var MATCHES "^CONF_" AND NOT _type STREQUAL "UNINITIALIZED")
+    string(APPEND _conf_txt "${_var}=$CACHE{${_var}}\n")
+  endif()
+endforeach()
+file(WRITE ${CMAKE_BINARY_DIR}/config.txt "${_conf_txt}")
+configure_file(${CMAKE_BINARY_DIR}/config.txt ${CMAKE_SOURCE_DIR}/config.txt COPYONLY)
+
 set(CONF_CONFIG_DIR ${CMAKE_BINARY_DIR}/config)
 configure_file(${CMAKE_SOURCE_DIR}/config.h.in ${CONF_CONFIG_DIR}/config.h)
 configure_file(${CMAKE_SOURCE_DIR}/config.mk.in ${CONF_CONFIG_DIR}/config.mk)

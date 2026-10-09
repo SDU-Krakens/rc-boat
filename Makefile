@@ -10,6 +10,10 @@ SWD_SPEED_KHZ := 1000
 BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 NPROC := $(shell nproc)
 
+# Tracked CONF_* values, written by CMake (see CMakeLists.txt)
+CONFIG_TXT := config.txt
+CONF_DEFS = $(addprefix -D,$(shell grep -v '^\#' $(CONFIG_TXT) 2>/dev/null))
+
 # First ssh asks for the password and becomes the master, later ssh/scp reuse
 # it. Closed at the end of each remote recipe, lingers 10 s idle on failure.
 SSH_OPTS := -o ControlMaster=auto -o ControlPath=$(BUILD_DIR)/.ssh-%C \
@@ -23,11 +27,11 @@ SCP := scp $(SSH_OPTS)
 	check-config check-remote
 
 build:
-	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CONF_DEFS)
 	cmake --build $(BUILD_DIR) -j$(NPROC)
 
 config:
-	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CONF_DEFS)
 	ccmake $(BUILD_DIR)
 
 pullbuild:
