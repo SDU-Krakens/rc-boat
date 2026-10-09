@@ -7,6 +7,8 @@ CONFIG_MK := $(BUILD_DIR)/config/config.mk
 PICO_ELF := $(BUILD_DIR)/pico/pico.elf
 RPI_BIN := $(BUILD_DIR)/rpi/rc-boat
 SWD_SPEED_KHZ := 1000
+# Built by .github/workflows/build.yml on every push to main
+RELEASE_URL := https://github.com/SDU-Krakens/rc-boat/releases/latest/download
 BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 NPROC := $(shell nproc)
 
@@ -69,11 +71,17 @@ flash-remote: check-remote build
 	$(SSH) $(ZERO_HOST) "cd $(ZERO_DIR) && make flash"
 	$(SSH) -O exit $(ZERO_HOST)
 
-# Run on the Zero
+# Run on the Zero. Downloads the latest release instead of building. Temp file
+# and mv, because a running rc-boat cannot be written to, only replaced.
 deploy:
 	git fetch --all
 	git reset --hard origin/main
-	$(MAKE) build
+	mkdir -p $(dir $(RPI_BIN)) $(dir $(PICO_ELF)) $(dir $(CONFIG_MK))
+	for f in $(RPI_BIN) $(PICO_ELF) $(CONFIG_MK); do \
+		curl -fsSL -o $$f.tmp $(RELEASE_URL)/$$(basename $$f) && \
+		mv -f $$f.tmp $$f || exit 1; \
+	done
+	chmod 755 $(RPI_BIN)
 	$(MAKE) flash
 	systemctl restart boat
 
