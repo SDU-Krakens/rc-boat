@@ -133,26 +133,26 @@ problem. The script is safe to run again.
 
 The script does these steps:
 
-1. Installs the packages: build tools, `arm-none-eabi` toolchain, CMake,
-   Python 3 and OpenOCD.
-2. Clones the Pico SDK 2.3.1 into `/opt/pico-sdk`. It sets
-   `PICO_SDK_PATH` in `/etc/profile.d/pico-sdk.sh`.
-3. Clones the `main` branch into the repository directory. If the
+1. Installs the packages: Git, curl, Make, Python 3 and OpenOCD.
+2. Clones the `main` branch into the repository directory. If the
    directory exists, it resets the directory to `origin/main`.
-4. Builds with `make build`.
-5. Makes the log directory `/var/log/rc-boat`.
-6. Enables the UART (serial console off) and SPI.
-7. Makes the `rc-boat` group and the `cmd` user. The login shell of `cmd`
+3. Downloads the latest build from the GitHub releases into `dist/`:
+   `rc-boat`, `pico.elf` and `config.mk`. The Zero does not build. The
+   GitHub workflow (`.github/workflows/build.yml`) builds on each push to
+   `main`.
+4. Makes the log directory `/var/log/rc-boat`.
+5. Enables the UART (serial console off) and SPI.
+6. Makes the `rc-boat` group and the `cmd` user. The login shell of `cmd`
    is `/usr/local/bin/rc-boat-cmd`. It starts `cmd.py`.
-8. Sets the root password. Permits root login with a password over SSH
+7. Sets the root password. Permits root login with a password over SSH
    (`/etc/ssh/sshd_config.d/rc-boat.conf`).
-9. Sets the hostname to `boat`.
-10. Installs and enables `boat.service`. The service runs as root with the
-    group `rc-boat`.
-11. Programs the Pico with `make flash`. If this step fails, the script
+8. Sets the hostname to `boat`.
+9. Installs and enables `boat.service`. The service runs as root with the
+   group `rc-boat`.
+10. Programs the Pico with `make flash`. If this step fails, the script
     shows a warning and continues.
-12. Adds the Wi-Fi connection `rc-boat-wifi` with DNS 1.1.1.1.
-13. Restarts the Zero.
+11. Adds the Wi-Fi connection `rc-boat-wifi` with DNS 1.1.1.1.
+12. Restarts the Zero.
 
 > **CAUTION:** The script does `git reset --hard origin/main` in the
 > repository directory. This removes all local changes.

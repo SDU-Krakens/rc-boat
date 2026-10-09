@@ -9,8 +9,8 @@ set -euo pipefail
 
 REPO_URL=https://github.com/SDU-Krakens/rc-boat.git
 REPO_BRANCH=main
-PICO_SDK_TAG=2.3.1
-PICO_SDK_DIR=/opt/pico-sdk
+# Built by .github/workflows/build.yml on every push to main
+RELEASE_URL=https://github.com/SDU-Krakens/rc-boat/releases/latest/download
 LOG_DIR=/var/log/rc-boat
 GROUP=rc-boat
 CMD_USER=cmd
@@ -60,22 +60,7 @@ ask_secret ROOT_PASS "Password for root"
 
 step "Packages"
 apt-get update
-apt-get install -y git cmake cmake-curses-gui make build-essential \
-	gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib \
-	python3 openocd
-
-step "Pico SDK $PICO_SDK_TAG"
-if [ -d "$PICO_SDK_DIR/.git" ]; then
-	git -C "$PICO_SDK_DIR" fetch --depth 1 origin tag "$PICO_SDK_TAG"
-	git -C "$PICO_SDK_DIR" checkout -f "$PICO_SDK_TAG"
-	git -C "$PICO_SDK_DIR" submodule update --init --depth 1
-else
-	git clone --depth 1 --branch "$PICO_SDK_TAG" --recurse-submodules \
-		--shallow-submodules https://github.com/raspberrypi/pico-sdk.git \
-		"$PICO_SDK_DIR"
-fi
-echo "export PICO_SDK_PATH=$PICO_SDK_DIR" >/etc/profile.d/pico-sdk.sh
-export PICO_SDK_PATH=$PICO_SDK_DIR
+apt-get install -y git curl make python3 openocd
 
 step "Repo $REPO_BRANCH in $REPO_DIR"
 if [ -d "$REPO_DIR/.git" ]; then
@@ -87,8 +72,12 @@ else
 	git clone --branch "$REPO_BRANCH" "$REPO_URL" "$REPO_DIR"
 fi
 
-step "Build"
-make -C "$REPO_DIR" build
+step "Download the latest build"
+mkdir -p "$REPO_DIR/dist/rpi" "$REPO_DIR/dist/pico" "$REPO_DIR/dist/config"
+curl -fsSL -o "$REPO_DIR/dist/rpi/rc-boat" "$RELEASE_URL/rc-boat"
+curl -fsSL -o "$REPO_DIR/dist/pico/pico.elf" "$RELEASE_URL/pico.elf"
+curl -fsSL -o "$REPO_DIR/dist/config/config.mk" "$RELEASE_URL/config.mk"
+chmod 755 "$REPO_DIR/dist/rpi/rc-boat"
 
 step "Log directory"
 mkdir -p "$LOG_DIR"
