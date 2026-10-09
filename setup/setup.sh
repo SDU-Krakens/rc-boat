@@ -73,10 +73,17 @@ else
 fi
 
 step "Download the latest build"
-mkdir -p "$REPO_DIR/dist/rpi" "$REPO_DIR/dist/pico" "$REPO_DIR/dist/config"
-curl -fsSL -o "$REPO_DIR/dist/rpi/rc-boat" "$RELEASE_URL/rc-boat"
-curl -fsSL -o "$REPO_DIR/dist/pico/pico.elf" "$RELEASE_URL/pico.elf"
-curl -fsSL -o "$REPO_DIR/dist/config/config.mk" "$RELEASE_URL/config.mk"
+# Download to a temp file and mv over the old one: a running rc-boat cannot be
+# written to ("Text file busy"), but it can be replaced
+download() {
+	local name=$1 dest=$2
+	mkdir -p "$(dirname "$dest")"
+	curl -fsSL -o "$dest.tmp" "$RELEASE_URL/$name"
+	mv -f "$dest.tmp" "$dest"
+}
+download rc-boat "$REPO_DIR/dist/rpi/rc-boat"
+download pico.elf "$REPO_DIR/dist/pico/pico.elf"
+download config.mk "$REPO_DIR/dist/config/config.mk"
 chmod 755 "$REPO_DIR/dist/rpi/rc-boat"
 
 step "Log directory"
